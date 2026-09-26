@@ -140,6 +140,7 @@ public partial class ShellViewModel : ObservableObject
     private ViewState _state = ViewState.NoDocument;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SourceText))]
     private MarkdownSource? _document;
 
     [ObservableProperty]
@@ -240,7 +241,7 @@ public partial class ShellViewModel : ObservableObject
 
     public string FileName => EditorSession?.FileName ?? Document?.FileName ?? string.Empty;
 
-    public string? SourceText => Document?.Content;
+    public string? SourceText => EditorSession?.SourceText ?? Document?.Content;
 
     public string TitleFileDisplayName => string.IsNullOrWhiteSpace(FileName)
         ? string.Empty
@@ -1260,6 +1261,7 @@ public partial class ShellViewModel : ObservableObject
         EditorSession?.SetStatusMessage(string.Empty);
         RefreshWindowTitle();
         UpdateCommandStates();
+        OnPropertyChanged(nameof(SourceText));
         return Task.CompletedTask;
     }
 
@@ -1423,6 +1425,7 @@ public partial class ShellViewModel : ObservableObject
 
         RefreshWindowTitle();
         UpdateCommandStates();
+        OnPropertyChanged(nameof(SourceText));
         OnPropertyChanged(nameof(IsDirty));
         OnPropertyChanged(nameof(TitleFileDisplayName));
     }

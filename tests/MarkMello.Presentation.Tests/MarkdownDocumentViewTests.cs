@@ -578,4 +578,17 @@ public sealed class MarkdownDocumentViewTests
                     }
                 ])
         ]);
+
+    [Fact]
+    public void MarkdownQuickEditorControlStyleKeyOverrideIsTextBox()
+    {
+        var editor = new MarkdownQuickEditorControl();
+        var prop = typeof(MarkdownQuickEditorControl).GetProperty(
+            "StyleKeyOverride",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        Assert.NotNull(prop);
+        var styleKey = prop.GetValue(editor);
+        Assert.Equal(typeof(TextBox), styleKey);
+    }
 }
+

@@ -17,7 +17,18 @@ public sealed partial class ShellViewModelTests
         Assert.Equal("quick_edit.md", harness.ViewModel.TitleFileDisplayName);
 
         // Применяем быстрое редактирование инлайн в режиме просмотра
+        var sourceTextChanged = false;
+        harness.ViewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ShellViewModel.SourceText))
+            {
+                sourceTextChanged = true;
+            }
+        };
+
         harness.ViewModel.ApplyQuickDocumentEdit("Hello edited world");
+
+        Assert.True(sourceTextChanged);
 
         // Режим остаётся режимом просмотра (две панели НЕ открываются!)
         Assert.False(harness.ViewModel.IsEditMode);

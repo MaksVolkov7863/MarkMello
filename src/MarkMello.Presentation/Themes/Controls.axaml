@@ -668,13 +668,20 @@
     <Setter Property="BorderThickness" Value="1.5" />
     <Setter Property="BorderBrush" Value="{DynamicResource MmAccentBrush}" />
     <Setter Property="CornerRadius" Value="6" />
-    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="MinHeight" Value="36" />
     <Setter Property="Foreground" Value="{DynamicResource MmTextBrush}" />
     <Setter Property="CaretBrush" Value="{DynamicResource MmAccentBrush}" />
     <Setter Property="SelectionBrush" Value="{DynamicResource MmAccentSoftBrush}" />
     <Setter Property="FocusAdorner" Value="{x:Null}" />
   </Style>
   <Style Selector="TextBox.mm-quick-inline-editor /template/ Border#PART_BorderElement">
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Background" Value="{DynamicResource MmElevatedBackgroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource MmAccentBrush}" />
+    <Setter Property="BorderThickness" Value="1.5" />
+  </Style>
+  <Style Selector="TextBox.mm-quick-inline-editor:pointerover /template/ Border#PART_BorderElement">
     <Setter Property="CornerRadius" Value="6" />
     <Setter Property="Background" Value="{DynamicResource MmElevatedBackgroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource MmAccentBrush}" />

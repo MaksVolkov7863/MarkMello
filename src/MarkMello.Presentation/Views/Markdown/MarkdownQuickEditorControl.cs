@@ -1,9 +1,10 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
-using Avalonia.Threading;
+using Avalonia.VisualTree;
 
 namespace MarkMello.Presentation.Views.Markdown;
 
@@ -12,6 +13,8 @@ namespace MarkMello.Presentation.Views.Markdown;
 /// </summary>
 public sealed class MarkdownQuickEditorControl : TextBox
 {
+    protected override Type StyleKeyOverride => typeof(TextBox);
+
     private bool _isCommitted;
 
     public event EventHandler? CommitRequested;
@@ -24,7 +27,35 @@ public sealed class MarkdownQuickEditorControl : TextBox
         AcceptsTab = false;
         TextWrapping = TextWrapping.Wrap;
         UseLayoutRounding = true;
-        LostFocus += (_, _) => RequestCommit();
+        ScrollViewer.SetHorizontalScrollBarVisibility(this, ScrollBarVisibility.Disabled);
+        ScrollViewer.SetVerticalScrollBarVisibility(this, ScrollBarVisibility.Auto);
+        LostFocus += OnLostFocus;
+    }
+
+    private void OnLostFocus(object? sender, RoutedEventArgs e)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        var focused = topLevel?.FocusManager?.GetFocusedElement() as Visual;
+        if (focused is not null && IsVisualDescendantOf(focused, this))
+        {
+            return;
+        }
+
+        RequestCommit();
+    }
+
+    private static bool IsVisualDescendantOf(Visual child, Visual parent)
+    {
+        Visual? current = child;
+        while (current is not null)
+        {
+            if (ReferenceEquals(current, parent))
+            {
+                return true;
+            }
+            current = current.GetVisualParent();
+        }
+        return false;
     }
 
     public void SetInitialCaret(int caretIndex)
@@ -61,7 +92,7 @@ public sealed class MarkdownQuickEditorControl : TextBox
     {
         if (e.Key == Key.Escape)
         {
-            RequestCommit();
+            RequestCancel();
             e.Handled = true;
             return;
         }

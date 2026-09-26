@@ -1860,14 +1860,9 @@ public sealed class MarkdownDocumentView : UserControl
 
         if (e.ClickCount == 2)
         {
-            var wordRange = fragment.GetDocumentWordRange(localPosition);
-            if (!wordRange.IsEmpty)
-            {
-                CommitSelection(wordRange, preserveOnRelease: true);
-                BeginPointerSession(e, fragment, localPosition, allowLinkActivation: false);
-                e.Handled = true;
-                return;
-            }
+            BeginQuickEdit(fragment, localPosition);
+            e.Handled = true;
+            return;
         }
 
         _isPointerPressed = true;
@@ -1917,7 +1912,7 @@ public sealed class MarkdownDocumentView : UserControl
         }
 
         var shouldTryQuickEdit = !_isDraggingSelection
-            && !_preserveSelectionOnRelease
+            && _activeQuickEditor is null
             && _pressedLink is null
             && _pressedFragment is not null
             && e.InitialPressMouseButton == MouseButton.Left;
@@ -2055,6 +2050,8 @@ public sealed class MarkdownDocumentView : UserControl
             Margin = targetControl.Margin,
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
+
+        editor.MinHeight = Math.Max(36, targetControl.Bounds.Height);
 
         if (targetControl is MarkdownSelectionTextFragment textFrag)
         {
