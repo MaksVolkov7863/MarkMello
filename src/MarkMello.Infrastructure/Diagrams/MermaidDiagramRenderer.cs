@@ -1,5 +1,6 @@
 using MarkMello.Application.Abstractions;
 using MarkMello.Domain;
+using MarkMello.Infrastructure.Diagrams.Sequence;
 using MermaidSharp;
 
 namespace MarkMello.Infrastructure.Diagrams;
@@ -18,6 +19,14 @@ namespace MarkMello.Infrastructure.Diagrams;
 /// </summary>
 public sealed class MermaidDiagramRenderer : IDiagramRenderer
 {
+    private readonly IDiagramTextMeasurer _textMeasurer;
+
+    public MermaidDiagramRenderer(IDiagramTextMeasurer textMeasurer)
+    {
+        ArgumentNullException.ThrowIfNull(textMeasurer);
+        _textMeasurer = textMeasurer;
+    }
+
     public MarkdownDiagramKind Kind => MarkdownDiagramKind.Mermaid;
 
     public DiagramRenderResult Render(DiagramRenderRequest request)
@@ -30,7 +39,13 @@ public sealed class MermaidDiagramRenderer : IDiagramRenderer
         {
             // Options are built per call: edit-mode preview renders off the UI
             // thread, so nothing here may be shared mutable state.
-            var svg = Mermaid.Render(source, new RenderOptions());
+            var options = new RenderOptions();
+            var svg = Mermaid.Render(source, options);
+            svg = SequenceSvgLayout.Apply(source, svg, options, _textMeasurer);
+            if (!string.IsNullOrEmpty(svg))
+            {
+                svg = MermaidSvgCanvas.AddBackground(svg);
+            }
             return string.IsNullOrEmpty(svg)
                 ? new DiagramRenderResult.Failure("Mermaid produced empty SVG output.", source)
                 : new DiagramRenderResult.Success(svg);

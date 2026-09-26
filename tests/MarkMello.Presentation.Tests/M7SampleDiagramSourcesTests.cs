@@ -14,7 +14,8 @@ namespace MarkMello.Presentation.Tests;
 /// refactor could quietly break a documented example and only surface
 /// the issue during manual UI verification.
 /// </summary>
-public sealed class M7SampleDiagramSourcesTests
+[Collection(AvaloniaHeadlessTestGroup.Name)]
+public sealed class M7SampleDiagramSourcesTests(AvaloniaHeadlessFixture fixture)
 {
     private const string FlowchartSource =
         "flowchart LR\n"
@@ -40,10 +41,10 @@ public sealed class M7SampleDiagramSourcesTests
     [InlineData(FlowchartSource)]
     [InlineData(SequenceSource)]
     [InlineData(StateSource)]
-    public void SampleDiagramRendersThroughTheRealMermaidPipeline(string source)
+    public async Task SampleDiagramRendersThroughTheRealMermaidPipeline(string source)
     {
-        var renderer = new MermaidDiagramRenderer();
-        var result = renderer.Render(new DiagramRenderRequest(source));
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
+        var result = await fixture.Session.Dispatch(() => renderer.Render(new DiagramRenderRequest(source)), CancellationToken.None);
 
         var success = Assert.IsType<DiagramRenderResult.Success>(result);
         Assert.True(

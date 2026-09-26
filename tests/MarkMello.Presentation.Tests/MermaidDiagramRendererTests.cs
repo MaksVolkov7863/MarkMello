@@ -4,12 +4,13 @@ using MarkMello.Infrastructure.Diagrams;
 
 namespace MarkMello.Presentation.Tests;
 
-public sealed class MermaidDiagramRendererTests
+[Collection(AvaloniaHeadlessTestGroup.Name)]
+public sealed class MermaidDiagramRendererTests(AvaloniaHeadlessFixture fixture)
 {
     [Fact]
     public void KindIsMermaid()
     {
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         Assert.Equal(MarkdownDiagramKind.Mermaid, renderer.Kind);
     }
@@ -23,7 +24,7 @@ public sealed class MermaidDiagramRendererTests
                 A[Start] --> B[End]
             """;
 
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         var result = renderer.Render(new DiagramRenderRequest(source));
 
@@ -34,7 +35,8 @@ public sealed class MermaidDiagramRendererTests
     }
 
     [Fact]
-    public void RenderProducesNonEmptySvgForSequenceDiagram()
+    public Task RenderProducesNonEmptySvgForSequenceDiagram()
+        => fixture.Session.Dispatch(() =>
     {
         const string source =
             """
@@ -43,20 +45,20 @@ public sealed class MermaidDiagramRendererTests
                 Bob-->>Alice: Hey
             """;
 
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         var result = renderer.Render(new DiagramRenderRequest(source));
 
         var success = Assert.IsType<DiagramRenderResult.Success>(result);
         Assert.False(string.IsNullOrEmpty(success.Svg));
-    }
+    }, CancellationToken.None);
 
     [Fact]
     public void RenderReturnsFailureForInvalidMermaidSource()
     {
         const string source = "this is not a valid mermaid diagram";
 
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         var result = renderer.Render(new DiagramRenderRequest(source));
 
@@ -68,7 +70,7 @@ public sealed class MermaidDiagramRendererTests
     [Fact]
     public void RenderReturnsFailureForEmptySource()
     {
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         var result = renderer.Render(new DiagramRenderRequest(string.Empty));
 
@@ -79,7 +81,7 @@ public sealed class MermaidDiagramRendererTests
     public void RenderPreservesOriginalSourceInFailure()
     {
         const string source = "graph";
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         var result = renderer.Render(new DiagramRenderRequest(source));
 
@@ -98,7 +100,7 @@ public sealed class MermaidDiagramRendererTests
                 A --> B
                 B --> C
             """;
-        var renderer = new MermaidDiagramRenderer();
+        var renderer = new MermaidDiagramRenderer(new MarkMello.Presentation.Services.AvaloniaDiagramTextMeasurer());
 
         renderer.Render(new DiagramRenderRequest(source));
 
