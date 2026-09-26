@@ -1,3 +1,5 @@
+using MarkMello.Presentation.ViewModels;
+
 namespace MarkMello.Presentation.Tests;
 
 public sealed partial class ShellViewModelTests
@@ -84,7 +86,7 @@ public sealed partial class ShellViewModelTests
 
         Assert.True(harness.ViewModel.IsEditMode);
         Assert.True(harness.ViewModel.ShowsAppMenuControl);
-        Assert.True(harness.ViewModel.ShowsFloatingAppMenuButton);
+        Assert.False(harness.ViewModel.ShowsFloatingAppMenuButton);
         Assert.True(harness.ViewModel.ShowsSaveButton);
         Assert.True(harness.ViewModel.SaveCommand.CanExecute(null));
         Assert.True(harness.ViewModel.ShowsEditToggle);

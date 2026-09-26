@@ -4,6 +4,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 
 namespace MarkMello.Presentation.Views.Markdown;
@@ -34,14 +35,22 @@ public sealed class MarkdownQuickEditorControl : TextBox
 
     private void OnLostFocus(object? sender, RoutedEventArgs e)
     {
-        var topLevel = TopLevel.GetTopLevel(this);
-        var focused = topLevel?.FocusManager?.GetFocusedElement() as Visual;
-        if (focused is not null && IsVisualDescendantOf(focused, this))
+        Dispatcher.UIThread.Post(() =>
         {
-            return;
-        }
+            if (_isCommitted)
+            {
+                return;
+            }
 
-        RequestCommit();
+            var topLevel = TopLevel.GetTopLevel(this);
+            var focused = topLevel?.FocusManager?.GetFocusedElement() as Visual;
+            if (focused is not null && (ReferenceEquals(focused, this) || IsVisualDescendantOf(focused, this)))
+            {
+                return;
+            }
+
+            RequestCommit();
+        }, DispatcherPriority.Background);
     }
 
     private static bool IsVisualDescendantOf(Visual child, Visual parent)

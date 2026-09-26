@@ -1817,13 +1817,16 @@ public sealed class MarkdownDocumentView : UserControl
             return;
         }
 
-        if (_activeQuickEditor is not null && e.Source is Visual sourceVisual && IsVisualDescendantOf(sourceVisual, _activeQuickEditor))
-        {
-            return;
-        }
-
         if (_activeQuickEditor is not null)
         {
+            var isOverEditor = (e.Source is Visual sourceVisual && (ReferenceEquals(sourceVisual, _activeQuickEditor) || IsVisualDescendantOf(sourceVisual, _activeQuickEditor)))
+                || (_activeQuickEditor.Parent is Visual parentVisual && _activeQuickEditor.Bounds.Contains(e.GetPosition(parentVisual)));
+
+            if (isOverEditor)
+            {
+                return;
+            }
+
             CommitQuickEditor();
         }
 
