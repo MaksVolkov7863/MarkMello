@@ -25,7 +25,7 @@ internal static class Program
         var metrics = new StopwatchStartupMetrics();
         metrics.Mark(StartupStage.AppBootstrap);
 
-        var services = ConfigureServices(metrics, args);
+        using var services = ConfigureServices(metrics, args);
         App.RegisterServices(services);
 
         return BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);

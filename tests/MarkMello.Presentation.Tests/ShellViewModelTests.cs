@@ -4,11 +4,12 @@ using MarkMello.Domain;
 using MarkMello.Domain.Diagnostics;
 using MarkMello.Presentation.Localization;
 using MarkMello.Presentation.ViewModels;
+using MarkMello.Presentation.Services;
 using System.Globalization;
 
 namespace MarkMello.Presentation.Tests;
 
-public sealed class ShellViewModelTests
+public sealed partial class ShellViewModelTests
 {
     [Fact]
     public async Task ToggleEditModeCommandLazilyCreatesEditorSession()
@@ -497,64 +498,6 @@ public sealed class ShellViewModelTests
     }
 
     [Fact]
-    public async Task CheckForUpdatesCommandWhenUpdateAvailableShowsDownloadAction()
-    {
-        var harness = CreateHarness();
-        var package = CreateUpdatePackage();
-        harness.UpdateService.NextCheckResult = new UpdateCheckResult.UpdateAvailable(package);
-
-        await harness.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
-
-        Assert.Equal("Update 1.2.3 available", harness.ViewModel.UpdateStatusTitle);
-        Assert.Contains(package.AssetName, harness.ViewModel.UpdateStatusMessage, StringComparison.Ordinal);
-        Assert.True(harness.ViewModel.CanDownloadAvailableUpdate);
-        Assert.False(harness.ViewModel.CanOpenDownloadedUpdate);
-        Assert.Equal("Available", harness.ViewModel.UpdateStateBadge);
-    }
-
-    [Fact]
-    public async Task DownloadUpdateCommandWhenSuccessfulShowsNativeAction()
-    {
-        var harness = CreateHarness();
-        var package = CreateUpdatePackage();
-        var downloadedPath = Path.Combine(Path.GetTempPath(), "MarkMello.Tests", package.AssetName);
-        harness.UpdateService.NextCheckResult = new UpdateCheckResult.UpdateAvailable(package);
-        harness.UpdateService.NextDownloadResult = new UpdateDownloadResult.Success(package, downloadedPath);
-
-        await harness.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
-        await harness.ViewModel.DownloadUpdateCommand.ExecuteAsync(null);
-
-        Assert.Equal("Update ready", harness.ViewModel.UpdateStatusTitle);
-        Assert.Contains(package.AssetName, harness.ViewModel.UpdateStatusMessage, StringComparison.Ordinal);
-        Assert.False(harness.ViewModel.CanDownloadAvailableUpdate);
-        Assert.True(harness.ViewModel.CanOpenDownloadedUpdate);
-        Assert.Equal("Launch installer", harness.ViewModel.DownloadedUpdateActionLabel);
-        Assert.Equal(downloadedPath, harness.ViewModel.DownloadedUpdatePath);
-        Assert.Equal("Ready", harness.ViewModel.UpdateStateBadge);
-    }
-
-    [Fact]
-    public async Task OpenDownloadedUpdateCommandWhenSuccessfulUpdatesStatus()
-    {
-        var harness = CreateHarness();
-        var package = CreateUpdatePackage();
-        var downloadedPath = Path.Combine(Path.GetTempPath(), "MarkMello.Tests", package.AssetName);
-        harness.UpdateService.NextCheckResult = new UpdateCheckResult.UpdateAvailable(package);
-        harness.UpdateService.NextDownloadResult = new UpdateDownloadResult.Success(package, downloadedPath);
-        harness.UpdateService.NextPrepareResult =
-            new UpdatePrepareResult.Success("Installer launched. Follow the native upgrade flow.");
-
-        await harness.ViewModel.CheckForUpdatesCommand.ExecuteAsync(null);
-        await harness.ViewModel.DownloadUpdateCommand.ExecuteAsync(null);
-        await harness.ViewModel.OpenDownloadedUpdateCommand.ExecuteAsync(null);
-
-        Assert.Equal("Native update flow started", harness.ViewModel.UpdateStatusTitle);
-        Assert.Equal(
-            "Installer launched. Follow the native upgrade flow.",
-            harness.ViewModel.UpdateStatusMessage);
-    }
-
-    [Fact]
     public async Task InitializeAsyncLoadsSavedLanguageAndLocalizesShellLabels()
     {
         var harness = CreateHarness();
@@ -653,7 +596,7 @@ public sealed class ShellViewModelTests
             ArchitectureName: "x64",
             InstallAction: AppUpdateInstallAction.LaunchInstaller);
 
-    private static TestHarness CreateHarness(FakeWorkspaceFileSystem? workspaceFileSystem = null)
+    private static TestHarness CreateHarness(FakeWorkspaceFileSystem? workspaceFileSystem = null, TimeSpan? updateDelay = null)
     {
         var loader = new StubDocumentLoader();
         var saver = new RecordingDocumentSaver();
@@ -682,7 +625,8 @@ public sealed class ShellViewModelTests
             new WorkspaceFileOperationsUseCase(fileSystem, new FakePlatformServices()),
             new FakePlatformServices(),
             static () => new FakeWorkspaceWatcher(),
-            new RecordingWindowLauncher());
+            new RecordingWindowLauncher(),
+            deferredUpdateCheck: updateDelay is { } delay ? new DeferredUpdateCheck(updateService, delay) : null);
 
         return new TestHarness(
             loader,

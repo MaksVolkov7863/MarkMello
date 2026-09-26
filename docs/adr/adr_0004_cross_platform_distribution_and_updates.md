@@ -128,7 +128,11 @@ Platform-specific completion:
 - macOS: download DMG and offer to open it.
 - Linux: download AppImage and offer to reveal it in the file system.
 
-The app should not perform background network checks on startup. Update checks are manual and user-initiated.
+The app performs one background discovery check 30 seconds after the first window opens. This delay keeps network work outside the startup fast path. All windows share that check; closing a window detaches its observer, and application shutdown cancels the pending check. Manual checks remain available in app settings and their results take precedence over delayed discovery in that window.
+
+When a newer suitable release exists, a circular 28px blue button appears immediately to the left of the theme selector, with the Lucide `arrow-down-to-line` icon. Its blue matches Codex's accent token (`#339CFF`); hovering mutes the background to 80% opacity and shows the localized tooltip `Обновить` / `Update`. Clicking opens the existing app settings update section, including from editing mode, without starting a download or installing anything. No update, network failure, or an unsupported target leaves the button hidden. The existing chrome visibility behavior is preserved.
+
+Download and installation remain user-initiated through the existing update section.
 
 ## Rationale
 
@@ -160,7 +164,7 @@ This approach keeps the product aligned with its desktop-reader identity while a
 ### Accepted Tradeoffs
 
 - We prefer platform-native install behavior over a fake single installer story.
-- We prefer manual update checks over background update infrastructure.
+- We use delayed background discovery with manual download and installation, without a separate update backend.
 - We prefer direct GitHub-hosted assets over a separate update backend in the first release.
 - We accept that file association support means "registered and available" rather than "forcibly default" on platforms that protect that choice.
 

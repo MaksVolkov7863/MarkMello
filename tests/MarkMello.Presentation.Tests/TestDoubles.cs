@@ -283,31 +283,6 @@ internal sealed class FakeDiagramRenderService : IDiagramRenderService
         => Handler(kind, source);
 }
 
-internal sealed class StubUpdateService : IUpdateService
-{
-    public UpdateCheckResult NextCheckResult { get; set; }
-        = new UpdateCheckResult.SourceNotConfigured("Update source is not configured.");
-
-    public UpdateDownloadResult NextDownloadResult { get; set; }
-        = new UpdateDownloadResult.Failed("No downloaded update configured for this test.");
-
-    public UpdatePrepareResult NextPrepareResult { get; set; }
-        = new UpdatePrepareResult.Failed("No native handoff configured for this test.");
-
-    public Task<UpdateCheckResult> CheckForUpdatesAsync(CancellationToken cancellationToken = default)
-        => Task.FromResult(NextCheckResult);
-
-    public Task<UpdateDownloadResult> DownloadUpdateAsync(
-        AppUpdatePackage package,
-        CancellationToken cancellationToken = default)
-        => Task.FromResult(NextDownloadResult);
-
-    public Task<UpdatePrepareResult> PrepareDownloadedUpdateAsync(
-        AppUpdatePackage package,
-        string downloadedFilePath,
-        CancellationToken cancellationToken = default)
-        => Task.FromResult(NextPrepareResult);
-}
 
 /// <summary>
 /// Запуск окон в тестах: реальные окна не создаём, но фиксируем, что вторая папка

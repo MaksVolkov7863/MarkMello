@@ -132,13 +132,6 @@ public partial class MainWindow : Window
             ? new Thickness(MacOsTitleBarLeadingInset, 0, TitleBarLeadingInset, 0)
             : new Thickness(TitleBarLeadingInset, 0, 0, 0);
 
-    private async void OnWindowOpened(object? sender, EventArgs e)
-    {
-        ApplyPendingWindowsStartupMaximize();
-        await _startupInitializationTask.ConfigureAwait(true);
-        await CompleteStartupSmokeTestAsync().ConfigureAwait(true);
-    }
-
     private async Task InitializeStartupAsync()
     {
         try
@@ -343,6 +336,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        StopUpdateNotification();
         DetachFindBar();
         DetachFindHost();
 

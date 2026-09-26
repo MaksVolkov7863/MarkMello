@@ -35,6 +35,7 @@ public static class DependencyInjection
         services.AddSingleton<IDiagramTextMeasurer, AvaloniaDiagramTextMeasurer>();
         services.AddSingleton<IThemeService, AvaloniaThemeService>();
         services.AddSingleton<ILocalizationService, LocalizationService>();
+        services.AddSingleton<DeferredUpdateCheck>();
 
         // Каждая editor-сессия получает свой планировщик preview: он держит
         // DispatcherTimer и номер поколения, которые нельзя делить между сессиями.

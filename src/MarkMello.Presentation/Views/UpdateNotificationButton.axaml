@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MarkMello.Presentation.ViewModels"
+             x:Class="MarkMello.Presentation.Views.UpdateNotificationButton"
+             x:DataType="vm:ShellViewModel"
+             IsVisible="{Binding HasAvailableUpdate}">
+  <UserControl.Resources>
+    <!-- Codex accent blue (blue-300). -->
+    <SolidColorBrush x:Key="UpdateBlueBrush" Color="#339CFF" />
+    <SolidColorBrush x:Key="UpdateBlueMutedBrush" Color="#339CFF" Opacity="0.8" />
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Button.update-notification">
+      <Setter Property="Width" Value="28" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="MinWidth" Value="28" />
+      <Setter Property="MinHeight" Value="28" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Background" Value="{StaticResource UpdateBlueBrush}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.update-notification:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource UpdateBlueMutedBrush}" />
+    </Style>
+    <Style Selector="Button.update-notification:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource UpdateBlueMutedBrush}" />
+    </Style>
+  </UserControl.Styles>
+  <Button Classes="update-notification"
+          Command="{Binding OpenUpdateSettingsCommand}"
+          ToolTip.Tip="{Binding UpdateActionHint}"
+          AutomationProperties.Name="{Binding UpdateActionHint}">
+    <!-- Lucide arrow-down-to-line: https://lucide.dev/icons/arrow-down-to-line -->
+    <Viewbox Width="14" Height="14">
+      <Canvas Width="24" Height="24">
+        <Path Data="M12 3V15 M7 10L12 15L17 10 M5 21H19"
+              Stroke="White"
+              StrokeThickness="2"
+              StrokeLineCap="Round"
+              StrokeJoin="Round"
+              Fill="Transparent" />
+      </Canvas>
+    </Viewbox>
+  </Button>
+</UserControl>

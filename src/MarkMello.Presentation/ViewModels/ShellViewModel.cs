@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MarkMello.Application.Abstractions;
-using MarkMello.Application.Updates;
 using MarkMello.Application.UseCases;
 using MarkMello.Domain;
 using MarkMello.Domain.Diagnostics;
@@ -41,7 +40,6 @@ public partial class ShellViewModel : ObservableObject
     /// дерева, потому что нужна и без открытой папки; в тестах подменяется.
     /// </summary>
     private readonly Func<string, bool> _fileExists;
-    private readonly IUpdateService _updateService;
     private readonly IImageSourceResolver? _imageSourceResolver;
     private readonly Func<IEditorPreviewScheduler>? _previewSchedulerFactory;
 
@@ -54,7 +52,6 @@ public partial class ShellViewModel : ObservableObject
     private readonly bool _showCustomTitleBar = OperatingSystem.IsWindows();
     private readonly string _aboutVersion;
     private readonly string _aboutLicense = "GPLv3";
-    private AppUpdatePackage? _availableUpdatePackage;
     private ReadingPreferences _documentReadingPreferences = GetDocumentRenderingPreferences(ReadingPreferences.Default);
     private WindowBorderMode _windowBorderMode = WindowBorderMode.Auto;
     private bool _isWindowBorderLoaded;
@@ -81,7 +78,8 @@ public partial class ShellViewModel : ObservableObject
         IWindowLauncher windowLauncher,
         Func<string, bool>? fileExists = null,
         IImageSourceResolver? imageSourceResolver = null,
-        Func<IEditorPreviewScheduler>? previewSchedulerFactory = null)
+        Func<IEditorPreviewScheduler>? previewSchedulerFactory = null,
+        DeferredUpdateCheck? deferredUpdateCheck = null)
     {
         _openDocument = openDocument;
         _saveDocument = saveDocument;
@@ -93,6 +91,7 @@ public partial class ShellViewModel : ObservableObject
         _startupMetrics = startupMetrics;
         _renderMarkdown = renderMarkdown;
         _updateService = updateService;
+        _deferredUpdateCheck = deferredUpdateCheck;
         _openFolder = openFolder;
         _expandFolderNode = expandFolderNode;
         _searchWorkspaceFiles = searchWorkspaceFiles;
@@ -237,21 +236,6 @@ public partial class ShellViewModel : ObservableObject
     [ObservableProperty]
     private string _errorDetails = string.Empty;
 
-    [ObservableProperty]
-    private bool _isCheckingForUpdates;
-
-    [ObservableProperty]
-    private bool _isDownloadingUpdate;
-
-    [ObservableProperty]
-    private string _updateStatusTitle = string.Empty;
-
-    [ObservableProperty]
-    private string _updateStatusMessage = string.Empty;
-
-    [ObservableProperty]
-    private string? _downloadedUpdatePath;
-
     public object ActiveDocumentContent => IsEditMode && EditorSession is not null ? EditorSession : this;
 
     public string FileName => EditorSession?.FileName ?? Document?.FileName ?? string.Empty;
@@ -278,12 +262,12 @@ public partial class ShellViewModel : ObservableObject
 
     public bool IsAppMenuOpen => ShowsAppMenuControl && ShellOverlay == ShellOverlayKind.AppMenu;
 
-    public bool IsAppSettingsOpen => ShowsAppMenuControl && ShellOverlay == ShellOverlayKind.AppSettings;
+    public bool IsAppSettingsOpen => ShellOverlay == ShellOverlayKind.AppSettings;
 
     public bool IsAppAboutOpen => ShowsAppMenuControl && ShellOverlay == ShellOverlayKind.AppAbout;
 
-    public bool IsAppOverlayOpen => ShowsAppMenuControl
-        && ShellOverlay is ShellOverlayKind.AppMenu or ShellOverlayKind.AppSettings or ShellOverlayKind.AppAbout;
+    public bool IsAppOverlayOpen => IsAppSettingsOpen || (ShowsAppMenuControl
+        && ShellOverlay is ShellOverlayKind.AppMenu or ShellOverlayKind.AppAbout);
 
     public bool HasOpenOverlay => IsSettingsOpen || IsAppOverlayOpen;
 
@@ -333,44 +317,6 @@ public partial class ShellViewModel : ObservableObject
     public string AboutLicense => _aboutLicense;
 
     public bool HasDirtyPromptError => !string.IsNullOrWhiteSpace(DirtyPromptErrorMessage);
-
-    public bool CanCheckForUpdates => !IsCheckingForUpdates && !IsDownloadingUpdate;
-
-    public bool CanDownloadAvailableUpdate
-        => _availableUpdatePackage is not null
-           && string.IsNullOrWhiteSpace(DownloadedUpdatePath)
-           && !IsCheckingForUpdates
-           && !IsDownloadingUpdate;
-
-    public bool CanOpenDownloadedUpdate
-        => _availableUpdatePackage is not null
-           && !string.IsNullOrWhiteSpace(DownloadedUpdatePath)
-           && !IsCheckingForUpdates
-           && !IsDownloadingUpdate;
-
-    public string CheckForUpdatesLabel => IsCheckingForUpdates ? _localization["UpdateChecking"] : _localization["UpdateCheckNow"];
-
-    public string DownloadUpdateLabel => IsDownloadingUpdate ? _localization["UpdateDownloading"] : _localization["UpdateDownload"];
-
-    public string DownloadedUpdateActionLabel
-        => _availableUpdatePackage?.InstallAction switch
-        {
-            AppUpdateInstallAction.LaunchInstaller => _localization["UpdateLaunchInstaller"],
-            AppUpdateInstallAction.OpenDiskImage => _localization["UpdateOpenDmg"],
-            AppUpdateInstallAction.RevealFile => _localization["UpdateRevealAppImage"],
-            _ => _localization["UpdateOpenDownloaded"]
-        };
-
-    public string UpdateStateBadge
-        => IsCheckingForUpdates
-            ? _localization["UpdateBadgeChecking"]
-            : IsDownloadingUpdate
-                ? _localization["UpdateBadgeDownloading"]
-                : CanOpenDownloadedUpdate
-                    ? _localization["UpdateBadgeReady"]
-                    : CanDownloadAvailableUpdate
-                        ? _localization["UpdateBadgeAvailable"]
-                        : _localization["UpdateBadgeManual"];
 
     public FontFamilyMode SelectedFontFamilyMode
     {
@@ -979,119 +925,6 @@ public partial class ShellViewModel : ObservableObject
     private void CloseOverlay()
     {
         CloseOverlayCore();
-    }
-
-    [RelayCommand(CanExecute = nameof(CanCheckForUpdates))]
-    private async Task CheckForUpdatesAsync()
-    {
-        IsCheckingForUpdates = true;
-        IsDownloadingUpdate = false;
-        _availableUpdatePackage = null;
-        DownloadedUpdatePath = null;
-        SetUpdateStatus(new UpdateStatusSnapshot.CheckingState());
-        UpdateCommandStates();
-
-        try
-        {
-            var result = await _updateService.CheckForUpdatesAsync().ConfigureAwait(true);
-            switch (result)
-            {
-                case UpdateCheckResult.SourceNotConfigured:
-                    SetUpdateStatus(new UpdateStatusSnapshot.SourceNotConfiguredState());
-                    break;
-
-                case UpdateCheckResult.UnsupportedPlatform unsupportedPlatform:
-                    SetUpdateStatus(new UpdateStatusSnapshot.UnsupportedPlatformState(
-                        unsupportedPlatform.PlatformName,
-                        unsupportedPlatform.ArchitectureName));
-                    break;
-
-                case UpdateCheckResult.UpToDate upToDate:
-                    SetUpdateStatus(new UpdateStatusSnapshot.UpToDateState(
-                        upToDate.CurrentVersion,
-                        upToDate.LatestVersion));
-                    break;
-
-                case UpdateCheckResult.UpdateAvailable updateAvailable:
-                    _availableUpdatePackage = updateAvailable.Package;
-                    SetUpdateStatus(new UpdateStatusSnapshot.UpdateAvailableState(updateAvailable.Package));
-                    break;
-
-                case UpdateCheckResult.Failed failed:
-                    SetUpdateStatus(new UpdateStatusSnapshot.CheckFailedState(failed.Message));
-                    break;
-            }
-        }
-        finally
-        {
-            IsCheckingForUpdates = false;
-            UpdateCommandStates();
-        }
-    }
-
-    [RelayCommand(CanExecute = nameof(CanDownloadAvailableUpdate))]
-    private async Task DownloadUpdateAsync()
-    {
-        if (_availableUpdatePackage is null)
-        {
-            return;
-        }
-
-        IsDownloadingUpdate = true;
-        SetUpdateStatus(new UpdateStatusSnapshot.DownloadingState(_availableUpdatePackage));
-        UpdateCommandStates();
-
-        try
-        {
-            var result = await _updateService
-                .DownloadUpdateAsync(_availableUpdatePackage)
-                .ConfigureAwait(true);
-
-            switch (result)
-            {
-                case UpdateDownloadResult.Success success:
-                    _availableUpdatePackage = success.Package;
-                    DownloadedUpdatePath = success.DownloadedFilePath;
-                    SetUpdateStatus(new UpdateStatusSnapshot.DownloadReadyState(success.Package, success.DownloadedFilePath));
-                    break;
-
-                case UpdateDownloadResult.Failed failed:
-                    DownloadedUpdatePath = null;
-                    SetUpdateStatus(new UpdateStatusSnapshot.DownloadFailedState(failed.Message));
-                    break;
-            }
-        }
-        finally
-        {
-            IsDownloadingUpdate = false;
-            UpdateCommandStates();
-        }
-    }
-
-    [RelayCommand(CanExecute = nameof(CanOpenDownloadedUpdate))]
-    private async Task OpenDownloadedUpdateAsync()
-    {
-        if (_availableUpdatePackage is null || string.IsNullOrWhiteSpace(DownloadedUpdatePath))
-        {
-            return;
-        }
-
-        var result = await _updateService
-            .PrepareDownloadedUpdateAsync(_availableUpdatePackage, DownloadedUpdatePath)
-            .ConfigureAwait(true);
-
-        switch (result)
-        {
-            case UpdatePrepareResult.Success:
-                SetUpdateStatus(new UpdateStatusSnapshot.NativeFlowStartedState(_availableUpdatePackage));
-                break;
-
-            case UpdatePrepareResult.Failed failed:
-                SetUpdateStatus(new UpdateStatusSnapshot.OpenDownloadedFailedState(failed.Message));
-                break;
-        }
-
-        UpdateCommandStates();
     }
 
     [RelayCommand]
@@ -1740,17 +1573,7 @@ public partial class ShellViewModel : ObservableObject
         ToggleEditModeCommand.NotifyCanExecuteChanged();
         SaveCommand.NotifyCanExecuteChanged();
         SaveAsCommand.NotifyCanExecuteChanged();
-        CheckForUpdatesCommand.NotifyCanExecuteChanged();
-        DownloadUpdateCommand.NotifyCanExecuteChanged();
-        OpenDownloadedUpdateCommand.NotifyCanExecuteChanged();
-
-        OnPropertyChanged(nameof(CanCheckForUpdates));
-        OnPropertyChanged(nameof(CanDownloadAvailableUpdate));
-        OnPropertyChanged(nameof(CanOpenDownloadedUpdate));
-        OnPropertyChanged(nameof(CheckForUpdatesLabel));
-        OnPropertyChanged(nameof(DownloadUpdateLabel));
-        OnPropertyChanged(nameof(DownloadedUpdateActionLabel));
-        OnPropertyChanged(nameof(UpdateStateBadge));
+        RefreshUpdateCommandStates();
     }
 
     private static string GetProductVersion()
