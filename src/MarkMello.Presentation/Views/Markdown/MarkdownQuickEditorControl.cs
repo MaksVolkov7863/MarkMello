@@ -24,6 +24,7 @@ public sealed class MarkdownQuickEditorControl : TextBox
         AcceptsTab = false;
         TextWrapping = TextWrapping.Wrap;
         UseLayoutRounding = true;
+        LostFocus += (_, _) => RequestCommit();
     }
 
     public void SetInitialCaret(int caretIndex)
@@ -80,11 +81,5 @@ public sealed class MarkdownQuickEditorControl : TextBox
         }
 
         base.OnKeyDown(e);
-    }
-
-    protected override void OnLostFocus(RoutedEventArgs e)
-    {
-        base.OnLostFocus(e);
-        RequestCommit();
     }
 }
