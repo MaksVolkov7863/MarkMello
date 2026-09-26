@@ -200,7 +200,7 @@ public sealed partial class ShellViewModelTests
         await harness.ViewModel.ToggleEditModeCommand.ExecuteAsync(null);
 
         Assert.True(harness.ViewModel.IsEditMode);
-        Assert.False(harness.ViewModel.ShowsAppMenuControl);
+        Assert.True(harness.ViewModel.ShowsAppMenuControl);
         Assert.False(harness.ViewModel.IsAppMenuOpen);
         Assert.False(harness.ViewModel.IsAppOverlayOpen);
         Assert.Null(harness.ViewModel.AppMenuOverlayContent);

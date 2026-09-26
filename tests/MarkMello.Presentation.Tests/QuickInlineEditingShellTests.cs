@@ -63,4 +63,33 @@ public sealed partial class ShellViewModelTests
         Assert.Equal("Updated text via quick edit", harness.ViewModel.EditorSession.SourceText);
         Assert.True(harness.ViewModel.IsDirty);
     }
+
+    [Fact]
+    public async Task CreateNewDocumentHasSaveButtonAndAppMenuAndAllowsToggleEditMode()
+    {
+        var harness = CreateHarness();
+
+        await harness.ViewModel.CreateNewDocumentCommand.ExecuteAsync(null);
+
+        Assert.True(harness.ViewModel.IsEditMode);
+        Assert.True(harness.ViewModel.ShowsAppMenuControl);
+        Assert.True(harness.ViewModel.ShowsFloatingAppMenuButton);
+        Assert.True(harness.ViewModel.ShowsSaveButton);
+        Assert.True(harness.ViewModel.SaveCommand.CanExecute(null));
+        Assert.True(harness.ViewModel.ShowsEditToggle);
+        Assert.True(harness.ViewModel.ToggleEditModeCommand.CanExecute(null));
+
+        harness.ViewModel.EditorSession!.SourceText = "# My New Document";
+
+        var savePath = Path.Combine(Path.GetTempPath(), "MarkMello.Tests", "my_new_doc.md");
+        harness.FilePicker.SavePath = savePath;
+
+        await harness.ViewModel.SaveCommand.ExecuteAsync(null);
+
+        var save = Assert.Single(harness.DocumentSaver.Saves);
+        Assert.Equal(savePath, save.Path);
+        Assert.Equal("# My New Document", save.Content);
+        Assert.False(harness.ViewModel.IsDirty);
+        Assert.Equal("my_new_doc.md", harness.ViewModel.TitleFileDisplayName);
+    }
 }
