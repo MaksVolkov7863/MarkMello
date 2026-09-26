@@ -240,6 +240,8 @@ public partial class ShellViewModel : ObservableObject
 
     public string FileName => EditorSession?.FileName ?? Document?.FileName ?? string.Empty;
 
+    public string? SourceText => Document?.Content;
+
     public string TitleFileDisplayName => string.IsNullOrWhiteSpace(FileName)
         ? string.Empty
         : FileName + (IsDirty ? " •" : string.Empty);
@@ -735,7 +737,7 @@ public partial class ShellViewModel : ObservableObject
         ApplySavedDocument(success.Source);
     }
 
-    private bool CanSave() => IsEditMode && EditorSession is not null;
+    private bool CanSave() => (IsEditMode && EditorSession is not null) || (State == ViewState.Viewing && EditorSession?.IsDirty == true);
 
     [RelayCommand(CanExecute = nameof(CanSaveAs))]
     private async Task SaveAsAsync()
@@ -755,7 +757,7 @@ public partial class ShellViewModel : ObservableObject
         ApplySavedDocument(success.Source);
     }
 
-    private bool CanSaveAs() => IsEditMode && EditorSession is not null;
+    private bool CanSaveAs() => (IsEditMode && EditorSession is not null) || (State == ViewState.Viewing && Document is not null);
 
     [RelayCommand]
     private async Task ConfirmDirtySaveAsync()
@@ -999,6 +1001,7 @@ public partial class ShellViewModel : ObservableObject
     partial void OnDocumentChanged(MarkdownSource? value)
     {
         RefreshDocumentSummary();
+        OnPropertyChanged(nameof(SourceText));
         OnPropertyChanged(nameof(ShowsEditToggle));
         RefreshWindowTitle();
         UpdateCommandStates();
@@ -1366,6 +1369,44 @@ public partial class ShellViewModel : ObservableObject
         UpdateCommandStates();
     }
 
+    public void ApplyQuickDocumentEdit(string newContent)
+    {
+        if (Document is null)
+        {
+            return;
+        }
+
+        if (EditorSession is null)
+        {
+            EditorSession = new EditorSessionViewModel(
+                Document,
+                ReadingPreferences,
+                _renderMarkdown,
+                _imageSourceResolver,
+                _localization,
+                CreatePreviewScheduler());
+        }
+
+        EditorSession.ApplyQuickEdit(newContent);
+        var updatedSource = new MarkdownSource(Document.Path, Document.FileName, newContent);
+        Document = updatedSource;
+        RenderedDocument = _renderMarkdown.Execute(
+            newContent,
+            baseDirectory: TryGetDirectory(Document.Path));
+
+        if (OpenDocuments.ActiveTab is { } tab)
+        {
+            tab.ApplyDocument(updatedSource, RenderedDocument);
+            tab.EditorSession = EditorSession;
+            tab.IsDirty = EditorSession.IsDirty;
+        }
+
+        RefreshWindowTitle();
+        UpdateCommandStates();
+        OnPropertyChanged(nameof(IsDirty));
+        OnPropertyChanged(nameof(TitleFileDisplayName));
+    }
+
     private void FailOpenResult(OpenDocumentResult result)
     {
         CloseOverlayCore();
@@ -1392,7 +1433,7 @@ public partial class ShellViewModel : ObservableObject
         QueueDirtyAction(kind, action);
     }
 
-    private bool RequiresDirtyResolution => IsEditMode && EditorSession?.IsDirty == true;
+    private bool RequiresDirtyResolution => EditorSession?.IsDirty == true;
 
     /// <summary>
     /// Каждая editor-сессия получает собственный планировщик preview: отложенный
