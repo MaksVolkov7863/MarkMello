@@ -39,7 +39,9 @@ public sealed partial class ShellViewModelTests
         // После сохранения статус dirty сброшен
         Assert.False(harness.ViewModel.IsDirty);
         Assert.Equal("quick_edit.md", harness.ViewModel.TitleFileDisplayName);
-        Assert.Equal("Hello edited world", harness.DocumentSaver.Saved[path]);
+        var save = Assert.Single(harness.DocumentSaver.Saves);
+        Assert.Equal(path, save.Path);
+        Assert.Equal("Hello edited world", save.Content);
     }
 
     [Fact]
