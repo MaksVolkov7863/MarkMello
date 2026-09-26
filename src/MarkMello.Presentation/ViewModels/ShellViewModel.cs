@@ -260,7 +260,8 @@ public partial class ShellViewModel : ObservableObject
 
     public bool IsSettingsOpen => ShellOverlay == ShellOverlayKind.ReadingSettings;
 
-    public bool ShowsAppMenuControl => true;
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Bound to XAML view.")]
+    public bool ShowsAppMenuControl => State != ViewState.LoadError || Document is not null || EditorSession is not null;
 
     public bool IsAppMenuOpen => ShellOverlay == ShellOverlayKind.AppMenu;
 
