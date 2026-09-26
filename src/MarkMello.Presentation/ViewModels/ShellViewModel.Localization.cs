@@ -247,7 +247,6 @@ public partial class ShellViewModel
     public string TabsOverflowLabel => _localization.Format("TabsOverflow", OpenDocuments.OverflowTabs.Count);
     public string AppMenuNewDocumentHint => _localization["AppMenuNewDocumentHint"];
     public string AppMenuNewDocumentLabel => _localization["AppMenuNewDocumentLabel"];
-    public string AppMenuOpenFileHint => _localization["AppMenuOpenFileHint"];
     public string AppMenuOpenFileLabel => _localization["AppMenuOpenFileLabel"];
     public string AppMenuSaveHint => _localization["AppMenuSaveHint"];
     public string AppMenuSaveLabel => _localization["AppMenuSaveLabel"];
