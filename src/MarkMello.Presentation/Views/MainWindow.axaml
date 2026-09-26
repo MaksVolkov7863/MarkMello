@@ -54,6 +54,7 @@
   </Window.KeyBindings>
 
   <Window.Styles>
+    <StyleInclude Source="/Themes/SidebarSplitter.axaml" />
     <Style Selector="Border.mm-top-chrome">
       <Setter Property="Opacity" Value="0" />
       <Setter Property="RenderTransform" Value="translate(0px,-4px)" />
@@ -225,7 +226,7 @@
              Диапазон 220-340 из макета, он же в WorkspaceSidebarWidth. -->
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="Auto" MinWidth="0" MaxWidth="340" />
-          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="0" />
           <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -242,9 +243,11 @@
         </ContentControl>
 
         <GridSplitter Grid.Column="1"
-                      Classes="mm-editor-splitter"
+                      Classes="mm-sidebar-splitter"
+                      ZIndex="1"
                       IsVisible="{Binding ShowsSidebar}"
                       DragCompleted="OnSidebarSplitterDragCompleted"
+                      ResizeBehavior="PreviousAndNext"
                       ResizeDirection="Columns" />
 
       <Grid Grid.Column="2"
