@@ -2054,7 +2054,7 @@ public sealed class MarkdownDocumentView : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
 
-        editor.MinHeight = Math.Max(36, targetControl.Bounds.Height);
+        editor.MinHeight = Math.Max(24, targetControl.Bounds.Height);
 
         if (targetControl is MarkdownSelectionTextFragment textFrag)
         {
@@ -2062,6 +2062,10 @@ public sealed class MarkdownDocumentView : UserControl
             editor.FontFamily = textFrag.BaseFontFamily;
             editor.FontWeight = textFrag.BaseFontWeight;
             editor.FontStyle = textFrag.BaseFontStyle;
+            if (!double.IsNaN(textFrag.BaseLineHeight))
+            {
+                editor.LineHeight = textFrag.BaseLineHeight;
+            }
         }
         else if (targetControl is TextBlock tb)
         {
@@ -2069,6 +2073,10 @@ public sealed class MarkdownDocumentView : UserControl
             editor.FontFamily = tb.FontFamily;
             editor.FontWeight = tb.FontWeight;
             editor.FontStyle = tb.FontStyle;
+            if (!double.IsNaN(tb.LineHeight))
+            {
+                editor.LineHeight = tb.LineHeight;
+            }
         }
         else if (fragment is MarkdownSelectionTextFragment fallbackFrag)
         {
@@ -2076,9 +2084,35 @@ public sealed class MarkdownDocumentView : UserControl
             editor.FontFamily = fallbackFrag.BaseFontFamily;
             editor.FontWeight = fallbackFrag.BaseFontWeight;
             editor.FontStyle = fallbackFrag.BaseFontStyle;
+            if (!double.IsNaN(fallbackFrag.BaseLineHeight))
+            {
+                editor.LineHeight = fallbackFrag.BaseLineHeight;
+            }
         }
 
-        var caretOffset = Math.Clamp(fragment.GetDocumentOffset(localPosition) - fragment.DocumentRange.Start, 0, blockText.Length);
+        var localFragOffset = Math.Clamp(fragment.GetDocumentOffset(localPosition) - fragment.DocumentRange.Start, 0, blockText.Length);
+        var caretOffset = localFragOffset;
+
+        // If block has a markdown prefix like "# " or "- " or "> " not in the rendered fragment text,
+        // offset the caret position into the raw markdown text accordingly
+        if (targetControl is not null && !string.IsNullOrEmpty(blockText))
+        {
+            var prefixLen = 0;
+            while (prefixLen < blockText.Length && (blockText[prefixLen] == '#' || blockText[prefixLen] == '>' || blockText[prefixLen] == '-' || blockText[prefixLen] == '*' || blockText[prefixLen] == ' ' || char.IsDigit(blockText[prefixLen]) || blockText[prefixLen] == '.'))
+            {
+                if (blockText[prefixLen] == ' ')
+                {
+                    prefixLen++;
+                    break;
+                }
+                prefixLen++;
+            }
+
+            if (prefixLen > 0 && prefixLen + localFragOffset <= blockText.Length)
+            {
+                caretOffset = prefixLen + localFragOffset;
+            }
+        }
 
         _quickEditorTargetControl = targetControl;
         _quickEditorParentPanel = parentPanel;

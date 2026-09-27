@@ -106,11 +106,20 @@ public sealed class MarkdownQuickEditorControl : TextBox
             return;
         }
 
-        if (e.Key == Key.Enter && (e.KeyModifiers & KeyModifiers.Control) != 0)
+        if (e.Key == Key.Enter)
         {
-            RequestCommit();
-            e.Handled = true;
-            return;
+            if ((e.KeyModifiers & KeyModifiers.Control) != 0 || (e.KeyModifiers & KeyModifiers.Shift) == 0)
+            {
+                // In single-line blocks (e.g. headings) or when Ctrl+Enter is pressed, commit the edit.
+                // In multiline text, Shift+Enter adds newline; Enter commits if it's a single line block.
+                var text = Text ?? string.Empty;
+                if ((e.KeyModifiers & KeyModifiers.Control) != 0 || !text.Contains('\n'))
+                {
+                    RequestCommit();
+                    e.Handled = true;
+                    return;
+                }
+            }
         }
 
         if (e.Key == Key.S && (e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0)
