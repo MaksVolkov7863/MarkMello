@@ -2121,9 +2121,12 @@ public sealed class MarkdownDocumentView : UserControl
         _quickEditorOriginalBlockText = blockText;
         _activeQuickEditor = editor;
 
-        targetControl.IsVisible = false;
+        if (targetControl is not null)
+        {
+            targetControl.IsVisible = false;
+        }
 
-        var index = parentPanel.Children.IndexOf(targetControl);
+        var index = targetControl is not null ? parentPanel.Children.IndexOf(targetControl) : -1;
         if (index >= 0)
         {
             parentPanel.Children.Insert(index + 1, editor);
