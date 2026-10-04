@@ -36,6 +36,46 @@ public sealed class PerTabEditorSessionTests
     }
 
     [Fact]
+    public async Task QuickEditInReadingModeSurvivesSwitchingTabsAndBack()
+    {
+        var harness = CreateHarness();
+        await harness.ViewModel.OpenPathAsync(@"C:\docs\first.md");
+        harness.ViewModel.ApplyQuickDocumentEdit("# first quick edited");
+
+        var first = harness.ViewModel.OpenDocuments.Tabs[0];
+        Assert.True(first.IsDirty);
+        Assert.False(harness.ViewModel.IsEditMode);
+
+        await harness.ViewModel.OpenPathAsync(@"C:\docs\second.md");
+
+        Assert.False(harness.ViewModel.IsEditMode);
+        Assert.True(first.IsDirty);
+
+        await harness.ViewModel.OpenDocuments.ActivateCommand.ExecuteAsync(first);
+
+        Assert.False(harness.ViewModel.IsEditMode);
+        Assert.Equal("# first quick edited", harness.ViewModel.Document!.Content);
+        Assert.True(harness.ViewModel.IsDirty);
+    }
+
+    [Fact]
+    public async Task QuickEditInReadingModeIsPreservedWhenSwitchingToEditMode()
+    {
+        var harness = CreateHarness();
+        await harness.ViewModel.OpenPathAsync(@"C:\docs\first.md");
+        harness.ViewModel.ApplyQuickDocumentEdit("# first quick edited");
+
+        Assert.False(harness.ViewModel.IsEditMode);
+        Assert.True(harness.ViewModel.IsDirty);
+
+        await harness.ViewModel.ToggleEditModeCommand.ExecuteAsync(null);
+
+        Assert.True(harness.ViewModel.IsEditMode);
+        Assert.Equal("# first quick edited", harness.ViewModel.EditorSession!.SourceText);
+        Assert.True(harness.ViewModel.IsDirty);
+    }
+
+    [Fact]
     public async Task SwitchingAwayFromDirtyTabDoesNotAskAnything()
     {
         var harness = CreateHarness();
