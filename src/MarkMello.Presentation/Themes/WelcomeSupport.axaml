@@ -1,0 +1,45 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Button.welcome-support">
+    <Setter Property="Background" Value="{DynamicResource MmAccentSoftBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MmAccentBrush}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="999" />
+    <Setter Property="Padding" Value="13,7,16,7" />
+    <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
+    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontWeight" Value="Medium" />
+    <Setter Property="Cursor" Value="Hand" />
+  </Style>
+  <Style Selector="Button.welcome-support /template/ ContentPresenter">
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Background" Duration="0:0:0.15" />
+        <BrushTransition Property="Foreground" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.welcome-support:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource MmAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MmElevatedBackgroundBrush}" />
+  </Style>
+  <Style Selector="Button.welcome-support:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="{DynamicResource MmAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource MmElevatedBackgroundBrush}" />
+    <Setter Property="Opacity" Value="0.88" />
+  </Style>
+  <Style Selector="Button.welcome-support Path">
+    <Setter Property="Fill" Value="{DynamicResource MmAccentBrush}" />
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="Fill" Duration="0:0:0.15" />
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="Button.welcome-support:pointerover Path">
+    <Setter Property="Fill" Value="{DynamicResource MmElevatedBackgroundBrush}" />
+  </Style>
+  <Style Selector="Button.welcome-support:pressed Path">
+    <Setter Property="Fill" Value="{DynamicResource MmElevatedBackgroundBrush}" />
+  </Style>
+</Styles>

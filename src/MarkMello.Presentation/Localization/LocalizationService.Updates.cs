@@ -4,6 +4,8 @@ public sealed partial class LocalizationService
 {
     static LocalizationService()
     {
+        AddWelcomeStrings();
+
         foreach (var entry in EnglishUpdates)
         {
             English[entry.Key] = entry.Value;

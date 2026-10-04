@@ -156,6 +156,7 @@ public partial class ShellViewModel
         nameof(WelcomeOpenFile),
         nameof(WelcomeOpenFolder),
         nameof(WelcomeTagline),
+        nameof(WelcomeSupport),
     ];
 
     public string AboutCreatedByPrefix => _localization["AboutCreatedByPrefix"];
@@ -298,11 +299,6 @@ public partial class ShellViewModel
     public string TitleBarRestore => _localization["TitleBarRestore"];
     public string UpdatesHint => _localization["UpdatesHint"];
     public string UpdatesLabel => _localization["UpdatesLabel"];
-    public string WelcomeCreateMd => _localization["WelcomeCreateMd"];
-    public string WelcomeDropHint => _localization["WelcomeDropHint"];
-    public string WelcomeOpenFile => _localization["WelcomeOpenFile"];
-    public string WelcomeOpenFolder => _localization["WelcomeOpenFolder"];
-    public string WelcomeTagline => _localization["WelcomeTagline"];
 
     public string WordCountStatusLabel => _localization.Format("StatusWordCount", WordCount);
 

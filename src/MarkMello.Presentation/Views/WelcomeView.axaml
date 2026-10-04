@@ -3,11 +3,12 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:MarkMello.Presentation.ViewModels"
+             xmlns:controls="using:MarkMello.Presentation.Controls"
              mc:Ignorable="d"
              x:Class="MarkMello.Presentation.Views.WelcomeView"
              x:DataType="vm:ShellViewModel">
 
-  <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+  <controls:WelcomePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"
                 MaxWidth="380">
 
@@ -85,6 +86,20 @@
       </StackPanel>
 
     </StackPanel>
-  </Grid>
+    <Button Classes="welcome-support"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,40"
+            Click="OnSupportClick">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Path Data="M7 12.25C7 12.25 1.5 9.1 1.5 5.1C1.5 3.3 2.9 2 4.5 2C5.6 2 6.5 2.6 7 3.5C7.5 2.6 8.4 2 9.5 2C11.1 2 12.5 3.3 12.5 5.1C12.5 9.1 7 12.25 7 12.25Z"
+              Width="14"
+              Height="14"
+              VerticalAlignment="Center" />
+        <TextBlock Text="{Binding WelcomeSupport}"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+    </Button>
+  </controls:WelcomePanel>
 
 </UserControl>
