@@ -1494,21 +1494,51 @@ public partial class ShellViewModel : ObservableObject
         ClearDirtyPromptState();
     }
 
+    private EditorSessionViewModel? EnsureEditorSession()
+    {
+        if (EditorSession is not null)
+        {
+            return EditorSession;
+        }
+
+        if (Document is null)
+        {
+            return null;
+        }
+
+        EditorSession = new EditorSessionViewModel(
+            Document,
+            ReadingPreferences,
+            _renderMarkdown,
+            _imageSourceResolver,
+            _localization,
+            CreatePreviewScheduler());
+
+        if (OpenDocuments.ActiveTab is { } tab)
+        {
+            tab.EditorSession = EditorSession;
+            tab.IsDirty = EditorSession.IsDirty;
+        }
+
+        return EditorSession;
+    }
+
     private async Task<SaveExecutionOutcome> SaveEditorAsync(bool promptForPathWhenMissing, bool forceSaveAs)
     {
-        if (EditorSession is null)
+        var session = EnsureEditorSession();
+        if (session is null)
         {
             return new SaveExecutionOutcome(false, new SaveDocumentResult.InvalidPath(string.Empty));
         }
 
-        var targetPath = forceSaveAs ? null : EditorSession.CurrentPath;
+        var targetPath = forceSaveAs ? null : session.CurrentPath;
         if (string.IsNullOrWhiteSpace(targetPath) && promptForPathWhenMissing)
         {
-            targetPath = await PickSavePathAsync(EditorSession.FileName).ConfigureAwait(true);
+            targetPath = await PickSavePathAsync(session.FileName).ConfigureAwait(true);
         }
         else if (forceSaveAs)
         {
-            targetPath = await PickSavePathAsync(EditorSession.FileName).ConfigureAwait(true);
+            targetPath = await PickSavePathAsync(session.FileName).ConfigureAwait(true);
         }
 
         if (string.IsNullOrWhiteSpace(targetPath))
@@ -1516,7 +1546,7 @@ public partial class ShellViewModel : ObservableObject
             return new SaveExecutionOutcome(true, null);
         }
 
-        var result = await _saveDocument.ExecuteAsync(targetPath, EditorSession.SourceText).ConfigureAwait(true);
+        var result = await _saveDocument.ExecuteAsync(targetPath, session.SourceText).ConfigureAwait(true);
         return new SaveExecutionOutcome(false, result);
     }
 

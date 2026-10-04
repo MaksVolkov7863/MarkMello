@@ -93,13 +93,7 @@ public sealed class MarkdownDocumentView : UserControl
     private MarkdownDocumentSelectionFragmentBase? _pressedFragment;
     private MarkdownLinkSpan? _pressedLink;
     private bool _preserveSelectionOnRelease;
-    private MarkdownQuickEditorControl? _activeQuickEditor;
-    private Control? _quickEditorTargetControl;
-    private Panel? _quickEditorParentPanel;
-    private int _quickEditorCharStart;
-    private int _quickEditorCharEnd;
-    private string _quickEditorOriginalBlockText = string.Empty;
-    private bool _isCommittingQuickEditor;
+    private readonly MarkdownQuickInlineEditingController _quickInlineEditingController;
     private MenuItem? _copyMenuItem;
     private MenuItem? _copyLinkMenuItem;
     private MenuItem? _copyTelegramMarkdownMenuItem;
@@ -120,6 +114,7 @@ public sealed class MarkdownDocumentView : UserControl
 
     public MarkdownDocumentView()
     {
+        _quickInlineEditingController = new MarkdownQuickInlineEditingController(this);
         Focusable = true;
         IsTabStop = true;
         UseLayoutRounding = true;
@@ -155,10 +150,7 @@ public sealed class MarkdownDocumentView : UserControl
 
     private void OnDetachedFromVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
     {
-        if (_activeQuickEditor is not null)
-        {
-            CancelQuickEditor();
-        }
+        _quickInlineEditingController.CommitQuickEditor();
 
         LayoutUpdated -= OnLayoutUpdatedAfterDocumentRebuild;
         _hasPendingRenderedNotification = false;
@@ -1817,17 +1809,14 @@ public sealed class MarkdownDocumentView : UserControl
             return;
         }
 
-        if (_activeQuickEditor is not null)
+        if (_quickInlineEditingController.HasActiveEditor)
         {
-            var isOverEditor = (e.Source is Visual sourceVisual && (ReferenceEquals(sourceVisual, _activeQuickEditor) || IsVisualDescendantOf(sourceVisual, _activeQuickEditor)))
-                || (_activeQuickEditor.Parent is Visual parentVisual && _activeQuickEditor.Bounds.Contains(e.GetPosition(parentVisual)));
-
-            if (isOverEditor)
+            if (_quickInlineEditingController.IsPointerOverActiveEditor(e.Source, e.GetPosition(this)))
             {
                 return;
             }
 
-            CommitQuickEditor();
+            _quickInlineEditingController.CommitQuickEditor();
         }
 
         var currentPoint = e.GetCurrentPoint(this);
@@ -1863,9 +1852,14 @@ public sealed class MarkdownDocumentView : UserControl
 
         if (e.ClickCount == 2)
         {
-            BeginQuickEdit(fragment, localPosition);
-            e.Handled = true;
-            return;
+            var wordRange = fragment.GetDocumentWordRange(localPosition);
+            if (!wordRange.IsEmpty)
+            {
+                CommitSelection(wordRange, preserveOnRelease: true);
+                BeginPointerSession(e, fragment, localPosition, allowLinkActivation: false);
+                e.Handled = true;
+                return;
+            }
         }
 
         _isPointerPressed = true;
@@ -1915,9 +1909,10 @@ public sealed class MarkdownDocumentView : UserControl
         }
 
         var shouldTryQuickEdit = !_isDraggingSelection
-            && _activeQuickEditor is null
+            && !_quickInlineEditingController.HasActiveEditor
             && _pressedLink is null
             && _pressedFragment is not null
+            && !string.IsNullOrEmpty(SourceText)
             && e.InitialPressMouseButton == MouseButton.Left;
 
         await TryActivatePressedLinkAsync(e);
@@ -1936,229 +1931,16 @@ public sealed class MarkdownDocumentView : UserControl
 
         if (shouldTryQuickEdit && fragmentToEdit is not null)
         {
-            BeginQuickEdit(fragmentToEdit, localPosToEdit);
+            _quickInlineEditingController.BeginQuickEdit(fragmentToEdit, localPosToEdit, _sourceLineAnchors, _root);
         }
     }
 
-    public void CommitQuickEditor()
-    {
-        if (_isCommittingQuickEditor || _activeQuickEditor is null || _quickEditorParentPanel is null || _quickEditorTargetControl is null)
-        {
-            return;
-        }
+    public void CommitQuickEditor() => _quickInlineEditingController.CommitQuickEditor();
 
-        _isCommittingQuickEditor = true;
-        try
-        {
-            var editor = _activeQuickEditor;
-            var targetControl = _quickEditorTargetControl;
-            var parentPanel = _quickEditorParentPanel;
-            var newBlockText = editor.Text ?? string.Empty;
-            var charStart = _quickEditorCharStart;
-            var charEnd = _quickEditorCharEnd;
-            var originalText = _quickEditorOriginalBlockText;
-            var source = SourceText;
+    public void CancelQuickEditor() => _quickInlineEditingController.CancelQuickEditor();
 
-            _activeQuickEditor = null;
-            _quickEditorTargetControl = null;
-            _quickEditorParentPanel = null;
-
-            parentPanel.Children.Remove(editor);
-            targetControl.IsVisible = true;
-
-            if (!string.IsNullOrEmpty(source) && !string.Equals(newBlockText, originalText, StringComparison.Ordinal))
-            {
-                var newFullText = MarkdownSourceBlockLocator.ReplaceRange(source, charStart, charEnd, newBlockText);
-                DocumentContentEdited?.Invoke(this, new MarkdownDocumentContentEditedEventArgs(newFullText));
-            }
-        }
-        finally
-        {
-            _isCommittingQuickEditor = false;
-        }
-    }
-
-    public void CancelQuickEditor()
-    {
-        if (_activeQuickEditor is null || _quickEditorParentPanel is null || _quickEditorTargetControl is null)
-        {
-            return;
-        }
-
-        var editor = _activeQuickEditor;
-        var targetControl = _quickEditorTargetControl;
-        var parentPanel = _quickEditorParentPanel;
-
-        _activeQuickEditor = null;
-        _quickEditorTargetControl = null;
-        _quickEditorParentPanel = null;
-
-        parentPanel.Children.Remove(editor);
-        targetControl.IsVisible = true;
-    }
-
-    private void BeginQuickEdit(MarkdownDocumentSelectionFragmentBase fragment, Point localPosition)
-    {
-        CommitQuickEditor();
-
-        if (string.IsNullOrEmpty(SourceText))
-        {
-            return;
-        }
-
-        Visual? current = fragment;
-        MarkdownSourceLineVisualAnchor? matchedAnchor = null;
-
-        while (current is not null && !ReferenceEquals(current, _root))
-        {
-            for (var i = _sourceLineAnchors.Count - 1; i >= 0; i--)
-            {
-                if (ReferenceEquals(_sourceLineAnchors[i].Control, current))
-                {
-                    matchedAnchor = _sourceLineAnchors[i];
-                    break;
-                }
-            }
-
-            if (matchedAnchor is not null)
-            {
-                break;
-            }
-
-            current = current.GetVisualParent();
-        }
-
-        if (matchedAnchor is null)
-        {
-            return;
-        }
-
-        var targetControl = matchedAnchor.Value.Control;
-        var span = matchedAnchor.Value.SourceSpan;
-        var parentPanel = targetControl.Parent as Panel;
-
-        if (parentPanel is null)
-        {
-            return;
-        }
-
-        if (!MarkdownSourceBlockLocator.TryExtractLines(SourceText, span.StartLine, span.EndLine, out var blockText, out var charStart, out var charEnd))
-        {
-            return;
-        }
-
-        var editor = new MarkdownQuickEditorControl
-        {
-            Text = blockText,
-            Margin = targetControl.Margin,
-            HorizontalAlignment = HorizontalAlignment.Stretch
-        };
-
-        editor.MinHeight = Math.Max(24, targetControl.Bounds.Height);
-
-        if (targetControl is MarkdownSelectionTextFragment textFrag)
-        {
-            editor.FontSize = textFrag.BaseFontSize;
-            editor.FontFamily = textFrag.BaseFontFamily;
-            editor.FontWeight = textFrag.BaseFontWeight;
-            editor.FontStyle = textFrag.BaseFontStyle;
-            if (!double.IsNaN(textFrag.BaseLineHeight))
-            {
-                editor.LineHeight = textFrag.BaseLineHeight;
-            }
-        }
-        else if (targetControl is TextBlock tb)
-        {
-            editor.FontSize = tb.FontSize;
-            editor.FontFamily = tb.FontFamily;
-            editor.FontWeight = tb.FontWeight;
-            editor.FontStyle = tb.FontStyle;
-            if (!double.IsNaN(tb.LineHeight))
-            {
-                editor.LineHeight = tb.LineHeight;
-            }
-        }
-        else if (fragment is MarkdownSelectionTextFragment fallbackFrag)
-        {
-            editor.FontSize = fallbackFrag.BaseFontSize;
-            editor.FontFamily = fallbackFrag.BaseFontFamily;
-            editor.FontWeight = fallbackFrag.BaseFontWeight;
-            editor.FontStyle = fallbackFrag.BaseFontStyle;
-            if (!double.IsNaN(fallbackFrag.BaseLineHeight))
-            {
-                editor.LineHeight = fallbackFrag.BaseLineHeight;
-            }
-        }
-
-        var localFragOffset = Math.Clamp(fragment.GetDocumentOffset(localPosition) - fragment.DocumentRange.Start, 0, blockText.Length);
-        var caretOffset = localFragOffset;
-
-        // If block has a markdown prefix like "# " or "- " or "> " not in the rendered fragment text,
-        // offset the caret position into the raw markdown text accordingly
-        if (targetControl is not null && !string.IsNullOrEmpty(blockText))
-        {
-            var prefixLen = 0;
-            while (prefixLen < blockText.Length && (blockText[prefixLen] == '#' || blockText[prefixLen] == '>' || blockText[prefixLen] == '-' || blockText[prefixLen] == '*' || blockText[prefixLen] == ' ' || char.IsDigit(blockText[prefixLen]) || blockText[prefixLen] == '.'))
-            {
-                if (blockText[prefixLen] == ' ')
-                {
-                    prefixLen++;
-                    break;
-                }
-                prefixLen++;
-            }
-
-            if (prefixLen > 0 && prefixLen + localFragOffset <= blockText.Length)
-            {
-                caretOffset = prefixLen + localFragOffset;
-            }
-        }
-
-        _quickEditorTargetControl = targetControl;
-        _quickEditorParentPanel = parentPanel;
-        _quickEditorCharStart = charStart;
-        _quickEditorCharEnd = charEnd;
-        _quickEditorOriginalBlockText = blockText;
-        _activeQuickEditor = editor;
-
-        if (targetControl is not null)
-        {
-            targetControl.IsVisible = false;
-        }
-
-        var index = targetControl is not null ? parentPanel.Children.IndexOf(targetControl) : -1;
-        if (index >= 0)
-        {
-            parentPanel.Children.Insert(index + 1, editor);
-        }
-        else
-        {
-            parentPanel.Children.Add(editor);
-        }
-
-        editor.CommitRequested += (_, _) => CommitQuickEditor();
-        editor.CancelRequested += (_, _) => CancelQuickEditor();
-
-        Dispatcher.UIThread.Post(() =>
-        {
-            editor.Focus();
-            editor.SetInitialCaret(caretOffset);
-        }, DispatcherPriority.Input);
-    }
-
-    private static bool IsVisualDescendantOf(Visual child, Visual parent)
-    {
-        Visual? current = child;
-        while (current is not null)
-        {
-            if (ReferenceEquals(current, parent))
-            {
-                return true;
-            }
-            current = current.GetVisualParent();
-        }
-        return false;
-    }
+    internal void RaiseDocumentContentEdited(string newContent)
+        => DocumentContentEdited?.Invoke(this, new MarkdownDocumentContentEditedEventArgs(newContent));
 
     private void OnPointerCaptureLost(object? sender, PointerCaptureLostEventArgs e)
     {

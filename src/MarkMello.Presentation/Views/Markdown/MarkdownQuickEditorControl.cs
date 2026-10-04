@@ -75,7 +75,9 @@ public sealed class MarkdownQuickEditorControl : TextBox
         SelectionEnd = clamped;
     }
 
-    public void RequestCommit()
+    public void RequestCommit() => Commit();
+
+    public void Commit()
     {
         if (_isCommitted)
         {

@@ -14,6 +14,7 @@ using MarkMello.Application.Abstractions;
 using MarkMello.Domain;
 using MarkMello.Domain.Workspace;
 using MarkMello.Presentation.ViewModels;
+using MarkMello.Presentation.Views.Markdown;
 
 namespace MarkMello.Presentation.Views;
 
@@ -463,6 +464,7 @@ public partial class MainWindow : Window
             {
                 if (MatchesKey(e, PhysicalKey.S, Key.S))
                 {
+                    CommitFocusedQuickEditor();
                     if (_viewModel.SaveAsCommand.CanExecute(null))
                     {
                         _viewModel.SaveAsCommand.Execute(null);
@@ -483,6 +485,7 @@ public partial class MainWindow : Window
 
                 if (MatchesKey(e, PhysicalKey.Tab, Key.Tab))
                 {
+                    CommitFocusedQuickEditor();
                     if (_viewModel.ActivatePreviousTabCommand.CanExecute(null))
                     {
                         _viewModel.ActivatePreviousTabCommand.Execute(null);
@@ -495,6 +498,7 @@ public partial class MainWindow : Window
             {
                 if (MatchesKey(e, PhysicalKey.S, Key.S))
                 {
+                    CommitFocusedQuickEditor();
                     if (_viewModel.SaveCommand.CanExecute(null))
                     {
                         _viewModel.SaveCommand.Execute(null);
@@ -525,6 +529,7 @@ public partial class MainWindow : Window
 
                 if (MatchesKey(e, PhysicalKey.E, Key.E))
                 {
+                    CommitFocusedQuickEditor();
                     if (_viewModel.ToggleEditModeCommand.CanExecute(null))
                     {
                         _viewModel.ToggleEditModeCommand.Execute(null);
@@ -585,6 +590,7 @@ public partial class MainWindow : Window
 
                 if (MatchesKey(e, PhysicalKey.Tab, Key.Tab))
                 {
+                    CommitFocusedQuickEditor();
                     if (_viewModel.ActivateNextTabCommand.CanExecute(null))
                     {
                         _viewModel.ActivateNextTabCommand.Execute(null);
@@ -592,6 +598,19 @@ public partial class MainWindow : Window
                         return;
                     }
                 }
+            }
+        }
+    }
+
+    private void CommitFocusedQuickEditor()
+    {
+        var focused = FocusManager?.GetFocusedElement() as Visual;
+        for (var current = focused; current is not null; current = current.GetVisualParent())
+        {
+            if (current is MarkdownQuickEditorControl editor)
+            {
+                editor.Commit();
+                break;
             }
         }
     }

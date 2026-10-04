@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using MarkMello.Domain;
 using MarkMello.Presentation.ViewModels;
 using MarkMello.Presentation.Views.Markdown.Minimap;
@@ -170,6 +171,12 @@ public partial class ViewerView : UserControl, IFindHost
             return;
         }
 
+        var focused = TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() as Visual;
+        if (focused is Markdown.MarkdownQuickEditorControl || IsVisualDescendantOf(focused, typeof(Markdown.MarkdownQuickEditorControl)))
+        {
+            return;
+        }
+
         if (HasCommandModifier(e.KeyModifiers) || e.KeyModifiers.HasFlag(KeyModifiers.Alt))
         {
             return;
@@ -223,6 +230,20 @@ public partial class ViewerView : UserControl, IFindHost
 
     private static bool HasCommandModifier(KeyModifiers modifiers)
         => modifiers.HasFlag(KeyModifiers.Control) || modifiers.HasFlag(KeyModifiers.Meta);
+
+    private static bool IsVisualDescendantOf(Visual? child, Type parentType)
+    {
+        var current = child;
+        while (current is not null)
+        {
+            if (parentType.IsInstanceOfType(current))
+            {
+                return true;
+            }
+            current = current.GetVisualParent();
+        }
+        return false;
+    }
 
     private void OnDocumentRendered(object? sender, EventArgs e)
     {
