@@ -31,6 +31,7 @@ public partial class MainWindow : Window
     private readonly ISettingsStore? _settings;
     private readonly Task _startupInitializationTask = Task.CompletedTask;
     private WindowPlacement? _lastNormalWindowPlacement;
+    private bool _restoresToMaximized;
     private Border? _windowBorder;
     private bool _allowConfirmedClose;
     private FindBarView? _findBar;
@@ -698,6 +699,10 @@ public partial class MainWindow : Window
     {
         if (e.Property == WindowStateProperty)
         {
+            _restoresToMaximized = ResolveRestoresToMaximized(
+                e.GetOldValue<WindowState>(),
+                e.GetNewValue<WindowState>(),
+                _restoresToMaximized);
             UpdateTitleBarMaximizeVisuals();
             UpdateWindowBorder();
         }
@@ -898,7 +903,11 @@ public partial class MainWindow : Window
 
         try
         {
-            var placement = CreateWindowPlacementForPersistence();
+            var placement = ResolveWindowPlacementForPersistence(
+                WindowState,
+                _restoresToMaximized,
+                _lastNormalWindowPlacement,
+                CaptureCurrentNormalWindowPlacement());
             _settings.SaveWindowPlacementAsync(placement).AsTask().GetAwaiter().GetResult();
         }
         catch
@@ -907,21 +916,34 @@ public partial class MainWindow : Window
         }
     }
 
-    private WindowPlacement? CreateWindowPlacementForPersistence()
-    {
-        if (WindowState == WindowState.Normal)
-        {
-            return CaptureCurrentNormalWindowPlacement();
-        }
+    /// <summary>
+    /// A minimized window comes back in the state it was minimized from: restoring a
+    /// window minimized while maximized maximizes it again.
+    /// </summary>
+    internal static bool ResolveRestoresToMaximized(
+        WindowState oldState,
+        WindowState newState,
+        bool restoresToMaximized)
+        => newState == WindowState.Minimized
+            ? oldState == WindowState.Maximized
+            : restoresToMaximized;
 
-        if (WindowState == WindowState.Maximized)
+    internal static WindowPlacement? ResolveWindowPlacementForPersistence(
+        WindowState windowState,
+        bool restoresToMaximized,
+        WindowPlacement? lastNormalPlacement,
+        WindowPlacement currentPlacement)
+        => windowState switch
         {
-            var normalPlacement = _lastNormalWindowPlacement ?? CaptureCurrentNormalWindowPlacement();
-            return normalPlacement with { IsMaximized = true };
-        }
-
-        return _lastNormalWindowPlacement;
-    }
+            WindowState.Normal => currentPlacement,
+            WindowState.Maximized => (lastNormalPlacement ?? currentPlacement) with { IsMaximized = true },
+            // Closed from the taskbar while minimized: the next start opens the window
+            // the way it would have come back from the taskbar.
+            WindowState.Minimized => lastNormalPlacement is { } placement
+                ? placement with { IsMaximized = restoresToMaximized }
+                : null,
+            _ => lastNormalPlacement
+        };
 
     private void UpdateReadingProgressBarWidth()
     {

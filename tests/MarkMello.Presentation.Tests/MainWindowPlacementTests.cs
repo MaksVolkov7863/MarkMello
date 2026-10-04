@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using MarkMello.Domain;
 using MarkMello.Presentation.Views;
 
@@ -78,6 +79,42 @@ public sealed class MainWindowPlacementTests
         Assert.Equal(192d, placement.Y);
         Assert.Equal(1200d, placement.Width);
         Assert.Equal(800d, placement.Height);
+    }
+
+    /// <summary>
+    /// Свёрнутое окно возвращается в то состояние, из которого его свернули. Закрытое
+    /// из панели задач в свёрнутом виде, оно должно и при следующем запуске открыться так же.
+    /// </summary>
+    [Theory]
+    [InlineData(new[] { WindowState.Maximized, WindowState.Minimized }, true)]
+    [InlineData(new[] { WindowState.Minimized }, false)]
+    [InlineData(new[] { WindowState.Maximized, WindowState.Normal, WindowState.Minimized }, false)]
+    [InlineData(new[] { WindowState.Maximized, WindowState.Minimized, WindowState.Maximized }, true)]
+    [InlineData(new[] { WindowState.Maximized, WindowState.Minimized, WindowState.Maximized, WindowState.Normal, WindowState.Minimized }, false)]
+    [InlineData(new[] { WindowState.Minimized, WindowState.Normal, WindowState.Maximized, WindowState.Minimized }, true)]
+    public void WindowPlacementForPersistenceKeepsTheStateAMinimizedWindowRestoresTo(
+        WindowState[] transitions,
+        bool expectedMaximized)
+    {
+        var normalPlacement = new WindowPlacement(120, 80, 900, 700, IsMaximized: false);
+        // Свёрнутое окно Windows уводит за пределы экрана: сохранять эти границы нельзя.
+        var minimizedPlacement = new WindowPlacement(-32000, -32000, 160, 28, IsMaximized: false);
+        var state = WindowState.Normal;
+        var restoresToMaximized = false;
+
+        foreach (var next in transitions)
+        {
+            restoresToMaximized = MainWindow.ResolveRestoresToMaximized(state, next, restoresToMaximized);
+            state = next;
+        }
+
+        var placement = MainWindow.ResolveWindowPlacementForPersistence(
+            state,
+            restoresToMaximized,
+            normalPlacement,
+            minimizedPlacement);
+
+        Assert.Equal(normalPlacement with { IsMaximized = expectedMaximized }, placement);
     }
 
     /// <summary>
