@@ -76,6 +76,7 @@ public partial class MainWindow : Window
         AddHandler(DragDrop.DropEvent, OnDrop);
         AddHandler(PointerPressedEvent, OnWindowPointerPressed, RoutingStrategies.Tunnel);
         AddHandler(KeyDownEvent, OnWindowKeyDown, RoutingStrategies.Tunnel);
+        AttachWindowsCaptionPressHook();
 
         Opened += OnWindowOpened;
         Closing += OnWindowClosing;
@@ -379,12 +380,7 @@ public partial class MainWindow : Window
 
     private void OnWindowPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (_viewModel.IsDirtyPromptOpen)
-        {
-            return;
-        }
-
-        if (!_viewModel.HasOpenOverlay || e.Source is not Visual source)
+        if (!CanCloseOverlayOnOutsidePress() || e.Source is not Visual source)
         {
             return;
         }
@@ -396,6 +392,9 @@ public partial class MainWindow : Window
 
         _viewModel.CloseOverlayCommand.Execute(null);
     }
+
+    private bool CanCloseOverlayOnOutsidePress()
+        => !_viewModel.IsDirtyPromptOpen && _viewModel.HasOpenOverlay;
 
     private void OnWindowKeyDown(object? sender, KeyEventArgs e)
     {
