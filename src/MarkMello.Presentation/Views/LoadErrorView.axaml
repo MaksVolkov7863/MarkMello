@@ -13,13 +13,13 @@
 
       <TextBlock Text="{Binding ErrorTitle}"
                  FontFamily="{DynamicResource MmDocumentSerifFontFamily}"
-                 FontSize="26"
+                 FontSize="{DynamicResource MmUiFontSize26}"
                  HorizontalAlignment="Center"
                  Foreground="{DynamicResource MmTextBrush}" />
 
       <SelectableTextBlock Text="{Binding ErrorDetails}"
                            FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                           FontSize="12"
+                           FontSize="{DynamicResource MmUiFontSize12}"
                            TextWrapping="Wrap"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"
@@ -36,7 +36,7 @@
       </StackPanel>
 
       <TextBlock HorizontalAlignment="Center"
-                 FontSize="11"
+                 FontSize="{DynamicResource MmUiFontSize11}"
                  Foreground="{DynamicResource MmTextFaintBrush}"
                  Margin="0,8,0,0">
         <Run Text="{Binding LoadErrorPress}" />

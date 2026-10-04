@@ -93,7 +93,7 @@
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize13}" />
       <Setter Property="FontWeight" Value="Medium" />
     </Style>
     <Style Selector="Button.mm-dialog-destructive:pointerover /template/ ContentPresenter">
@@ -112,7 +112,7 @@
     </Style>
     <Style Selector="Border.mm-external-change TextBlock">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextBrush}" />
     </Style>
 
@@ -123,7 +123,7 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextSoftBrush}" />
     </Style>
     <Style Selector="Button.mm-external-change-action:pointerover /template/ ContentPresenter">
@@ -173,7 +173,7 @@
                        Fill="{DynamicResource MmAccentBrush}"
                        IsVisible="{Binding HasDocumentTitle}" />
               <TextBlock Text="{Binding WindowTitle}"
-                         FontSize="12"
+                         FontSize="{DynamicResource MmUiFontSize12}"
                          FontWeight="Medium"
                          VerticalAlignment="Center"
                          TextTrimming="CharacterEllipsis"
@@ -375,7 +375,7 @@
                 </Viewbox>
                 <TextBlock Text="{Binding EditToggleLabel}"
                            FontFamily="{DynamicResource MmDocumentSansFontFamily}"
-                           FontSize="12" />
+                           FontSize="{DynamicResource MmUiFontSize12}" />
               </StackPanel>
             </ToggleButton>
 
@@ -462,7 +462,7 @@
         <ContentControl Name="SettingsPanel"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top"
-                        Margin="0,54,16,0"
+                        Margin="0,54,16,40"
                         Content="{Binding ReadingSettingsOverlayContent}">
           <ContentControl.ContentTemplate>
             <DataTemplate x:DataType="vm:ShellViewModel">
@@ -522,11 +522,11 @@
                         ClipToBounds="True"
                         IsVisible="{Binding ShowsReadingStatus}">
               <TextBlock Text="{Binding WordCountStatusLabel}"
-                          FontSize="11"
+                          FontSize="{DynamicResource MmUiFontSize11}"
                           Foreground="{DynamicResource MmTextFaintBrush}"
                          IsVisible="{Binding ShowsReadingStatus}" />
               <TextBlock Text="{Binding ReadTimeStatusLabel}"
-                          FontSize="11"
+                          FontSize="{DynamicResource MmUiFontSize11}"
                           Foreground="{DynamicResource MmTextFaintBrush}"
                          IsVisible="{Binding ShowsReadingStatus}" />
             </StackPanel>
@@ -540,15 +540,15 @@
                 <Border Classes="kbd">
                   <TextBlock Text="Ctrl"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <Border Classes="kbd">
                   <TextBlock Text="O"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <TextBlock Text="{Binding StatusOpen}"
-                           FontSize="11"
+                           FontSize="{DynamicResource MmUiFontSize11}"
                            Foreground="{DynamicResource MmTextFaintBrush}"
                            VerticalAlignment="Center"
                            Margin="2,0,0,0" />
@@ -561,15 +561,15 @@
                 <Border Classes="kbd">
                   <TextBlock Text="Ctrl"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <Border Classes="kbd">
                   <TextBlock Text="W"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <TextBlock Text="{Binding StatusCloseTab}"
-                           FontSize="11"
+                           FontSize="{DynamicResource MmUiFontSize11}"
                            Foreground="{DynamicResource MmTextFaintBrush}"
                            VerticalAlignment="Center"
                            Margin="2,0,0,0" />
@@ -580,15 +580,15 @@
                 <Border Classes="kbd">
                   <TextBlock Text="Ctrl"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <Border Classes="kbd">
                   <TextBlock Text="E"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <TextBlock Text="{Binding EditShortcutLabel}"
-                           FontSize="11"
+                           FontSize="{DynamicResource MmUiFontSize11}"
                            Foreground="{DynamicResource MmTextFaintBrush}"
                            VerticalAlignment="Center"
                            Margin="2,0,0,0" />
@@ -599,15 +599,15 @@
                 <Border Classes="kbd">
                   <TextBlock Text="Ctrl"
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <Border Classes="kbd">
                   <TextBlock Text=","
                              FontFamily="{DynamicResource MmDocumentMonoFontFamily}"
-                             FontSize="10" />
+                             FontSize="{DynamicResource MmUiFontSize10}" />
                 </Border>
                 <TextBlock Text="{Binding StatusPrefs}"
-                           FontSize="11"
+                           FontSize="{DynamicResource MmUiFontSize11}"
                            Foreground="{DynamicResource MmTextFaintBrush}"
                            VerticalAlignment="Center"
                            Margin="2,0,0,0" />
@@ -625,7 +625,7 @@
                 Margin="12">
           <TextBlock Text="{Binding DragDropHint}"
                      FontFamily="{DynamicResource MmDocumentSansFontFamily}"
-                     FontSize="14"
+                     FontSize="{DynamicResource MmUiFontSize14}"
                      Foreground="{DynamicResource MmAccentBrush}"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center" />

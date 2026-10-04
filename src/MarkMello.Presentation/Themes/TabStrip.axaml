@@ -30,7 +30,7 @@
 
     <Style Selector="TextBlock.mm-tab-title">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextSoftBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -42,7 +42,7 @@
 
     <Style Selector="TextBlock.mm-tab-disambiguator">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -92,7 +92,7 @@
       <Setter Property="BorderThickness" Value="1,0,0,0" />
       <Setter Property="CornerRadius" Value="0" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
       <Setter Property="VerticalAlignment" Value="Stretch" />
       <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -113,7 +113,7 @@
 
     <Style Selector="TextBlock.mm-tab-overflow-header">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="FontWeight" Value="Medium" />
       <Setter Property="LetterSpacing" Value="1" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
@@ -128,7 +128,7 @@
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextBrush}" />
     </Style>
     <Style Selector="Button.mm-tab-overflow-item:pointerover /template/ ContentPresenter">

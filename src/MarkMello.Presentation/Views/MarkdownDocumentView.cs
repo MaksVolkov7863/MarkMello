@@ -28,7 +28,7 @@ namespace MarkMello.Presentation.Views;
 /// headings, paragraphs, quote paragraph content, list paragraph content,
 /// code blocks и table cells.
 /// </summary>
-public sealed class MarkdownDocumentView : UserControl
+public sealed partial class MarkdownDocumentView : UserControl
 {
     public static readonly StyledProperty<RenderedMarkdownDocument?> DocumentProperty =
         AvaloniaProperty.Register<MarkdownDocumentView, RenderedMarkdownDocument?>(nameof(Document));
@@ -1662,113 +1662,6 @@ public sealed class MarkdownDocumentView : UserControl
         }
     }
 
-    private TextBlock BuildFallback(MarkdownBlock block)
-    {
-        return new TextBlock
-        {
-            Text = MarkdownDocumentTextMap.ExtractPlainText(block),
-            Classes = { "mm-md-paragraph" },
-            FontFamily = ResolveBodyFontFamily(),
-            FontSize = ReadingPreferences.FontSize,
-            LineHeight = GetBodyLineHeight(),
-            TextWrapping = TextWrapping.Wrap,
-            UseLayoutRounding = true
-        };
-    }
-
-    private Control BuildSelectionFragment(
-        string path,
-        IReadOnlyList<MarkdownInline> inlines,
-        Thickness margin,
-        double fontSize,
-        double lineHeight,
-        FontWeight fontWeight,
-        FontStyle fontStyle,
-        string fallbackClassName,
-        FontFamily? baseFontFamily = null,
-        TextWrapping textWrapping = TextWrapping.Wrap,
-        IBrush? baseForeground = null,
-        double letterSpacing = 0)
-    {
-        var styled = MarkdownStyledText.FromInlines(inlines);
-        if (styled.Text.Length == 0)
-        {
-            return new Border
-            {
-                Height = 0,
-                Margin = margin
-            };
-        }
-
-        var resolvedFontFamily = baseFontFamily ?? ResolveBodyFontFamily();
-        if (!_textMap.TryGetFragment(path, out var fragment))
-        {
-            var fallback = new TextBlock
-            {
-                Text = styled.Text,
-                Margin = margin,
-                FontFamily = resolvedFontFamily,
-                FontSize = fontSize,
-                FontWeight = fontWeight,
-                FontStyle = fontStyle,
-                LineHeight = lineHeight,
-                LetterSpacing = letterSpacing,
-                TextWrapping = textWrapping,
-                UseLayoutRounding = true,
-                Classes = { fallbackClassName }
-            };
-
-            if (baseForeground is not null)
-            {
-                fallback.Foreground = baseForeground;
-            }
-
-            return fallback;
-        }
-
-        if (MarkdownImageFlowFragment.TryCreate(inlines, out var imageItems))
-        {
-            var imageFlow = new MarkdownImageFlowFragment(imageItems)
-            {
-                Margin = margin,
-                DocumentRange = fragment.Range,
-                ImageSourceResolver = ImageSourceResolver,
-                BaseDirectory = Document?.BaseDirectory,
-                BaseFontFamily = resolvedFontFamily,
-                BaseFontSize = fontSize,
-                BaseLineHeight = lineHeight
-            };
-
-            imageFlow.Classes.Add(fallbackClassName);
-            RegisterSelectionFragment(imageFlow, path);
-            imageFlow.SelectionRange = new DocumentTextRange(SelectionStart, SelectionEnd);
-            return imageFlow;
-        }
-
-        var control = new MarkdownSelectionTextFragment
-        {
-            Margin = margin,
-            StyledText = styled,
-            DocumentRange = fragment.Range,
-            BaseFontFamily = resolvedFontFamily,
-            BaseFontSize = fontSize,
-            BaseFontWeight = fontWeight,
-            BaseFontStyle = fontStyle,
-            BaseLineHeight = lineHeight,
-            BaseForeground = baseForeground,
-            BaseLetterSpacing = letterSpacing,
-            LayoutTextWrapping = textWrapping,
-            ImageSourceResolver = ImageSourceResolver,
-            BaseDirectory = Document?.BaseDirectory,
-            Cursor = TryCreateCursor(StandardCursorType.Ibeam)
-        };
-
-        control.Classes.Add(fallbackClassName);
-        RegisterSelectionFragment(control, path);
-        control.SelectionRange = new DocumentTextRange(SelectionStart, SelectionEnd);
-        return control;
-    }
-
     private void RegisterSelectionFragment(MarkdownDocumentSelectionFragmentBase fragment, string path)
     {
         _selectionFragments.Add(fragment);
@@ -2417,35 +2310,6 @@ public sealed class MarkdownDocumentView : UserControl
         _pointerPressOrigin = default;
         _pressedFragment = null;
         _pressedLink = null;
-    }
-
-    private FontFamily ResolveBodyFontFamily() => ReadingPreferences.FontFamily switch
-    {
-        FontFamilyMode.Sans => LookupFontFamily("MmDocumentSansFontFamily"),
-        FontFamilyMode.Mono => LookupFontFamily("MmDocumentMonoFontFamily"),
-        _ => LookupFontFamily("MmDocumentSerifFontFamily")
-    };
-
-    private FontFamily ResolveSansFontFamily() => LookupFontFamily("MmDocumentSansFontFamily");
-
-    private FontFamily ResolveMonoFontFamily() => LookupFontFamily("MmDocumentMonoFontFamily");
-
-    private FontFamily LookupFontFamily(string resourceKey)
-    {
-        if (this.TryFindResource(resourceKey, ActualThemeVariant, out var value) && value is FontFamily family)
-        {
-            return family;
-        }
-
-        // Fallbacks mirror the minimal tail of the stacks in Themes/Typography.axaml
-        // so that rendering stays sensible if the ResourceDictionary is not yet attached.
-        return resourceKey switch
-        {
-            "MmDocumentSerifFontFamily" => new FontFamily("Georgia, Cambria, serif"),
-            "MmDocumentSansFontFamily" => new FontFamily("Segoe UI, system-ui, sans-serif"),
-            "MmDocumentMonoFontFamily" => new FontFamily("Consolas, Menlo, monospace"),
-            _ => FontFamily.Default
-        };
     }
 
     private double GetBodyLineHeight() => Math.Max(ReadingPreferences.FontSize * ReadingPreferences.LineHeight, ReadingPreferences.FontSize + 4);

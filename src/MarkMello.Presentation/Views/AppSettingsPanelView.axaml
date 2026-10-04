@@ -126,7 +126,7 @@
 
                   <StackPanel Spacing="4">
                     <TextBlock Classes="mm-setting-label"
-                               FontSize="12"
+                               FontSize="{DynamicResource MmUiFontSize12}"
                                FontWeight="SemiBold"
                                Text="{Binding UpdateStatusTitle}"
                                TextWrapping="Wrap" />

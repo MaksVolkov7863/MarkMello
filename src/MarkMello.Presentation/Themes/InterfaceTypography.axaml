@@ -1,0 +1,12 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Style Selector="Window">
+    <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize14}" />
+  </Style>
+  <Style Selector="MenuItem">
+    <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize14}" />
+  </Style>
+  <Style Selector="ToolTip">
+    <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize14}" />
+  </Style>
+</Styles>

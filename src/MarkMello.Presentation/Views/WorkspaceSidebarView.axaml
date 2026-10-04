@@ -22,7 +22,7 @@
 
     <Style Selector="TextBlock.mm-sidebar-root">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12}" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextSoftBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -118,7 +118,7 @@
 
     <Style Selector="TextBlock.mm-tree-label">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
       <Setter Property="TextTrimming" Value="CharacterEllipsis" />
@@ -142,7 +142,7 @@
 
     <Style Selector="TextBlock.mm-tree-error">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="Foreground" Value="{DynamicResource MmAccentBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
@@ -169,7 +169,7 @@
       <Setter Property="Padding" Value="0" />
       <Setter Property="MinHeight" Value="0" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextBrush}" />
       <Setter Property="CaretBrush" Value="{DynamicResource MmTextBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -194,14 +194,14 @@
     <Style Selector="TextBlock.mm-search-caption">
       <Setter Property="Margin" Value="14,2,14,4" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="10.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize10_5}" />
       <Setter Property="LetterSpacing" Value="0.8" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
     </Style>
 
     <Style Selector="TextBlock.mm-search-count">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentMonoFontFamily}" />
-      <Setter Property="FontSize" Value="10.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize10_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
@@ -222,13 +222,13 @@
 
     <Style Selector="TextBlock.mm-search-hit-path">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
     </Style>
 
     <Style Selector="TextBlock.mm-search-empty">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
       <Setter Property="HorizontalAlignment" Value="Center" />
       <Setter Property="VerticalAlignment" Value="Center" />
@@ -246,7 +246,7 @@
     </Style>
     <Style Selector="Border.mm-search-truncated TextBlock">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextSoftBrush}" />
     </Style>
 
@@ -258,7 +258,7 @@
     </Style>
     <Style Selector="Border.mm-sidebar-footer TextBlock">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentMonoFontFamily}" />
-      <Setter Property="FontSize" Value="10.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize10_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextFaintBrush}" />
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
@@ -290,7 +290,7 @@
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="4" />
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="12.5" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12_5}" />
       <Setter Property="Foreground" Value="{DynamicResource MmTextBrush}" />
       <Setter Property="VerticalContentAlignment" Value="Center" />
       <Setter Property="SelectionBrush" Value="{DynamicResource MmSelectionBrush}" />
@@ -322,7 +322,7 @@
 
     <Style Selector="TextBlock.mm-tree-edit-error">
       <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize11}" />
       <Setter Property="Foreground" Value="{DynamicResource MmAccentBrush}" />
     </Style>
 

@@ -7,7 +7,7 @@
     <Setter Property="CornerRadius" Value="999" />
     <Setter Property="Padding" Value="13,7,16,7" />
     <Setter Property="FontFamily" Value="{DynamicResource MmDocumentSansFontFamily}" />
-    <Setter Property="FontSize" Value="12.5" />
+    <Setter Property="FontSize" Value="{DynamicResource MmUiFontSize12_5}" />
     <Setter Property="FontWeight" Value="Medium" />
     <Setter Property="Cursor" Value="Hand" />
   </Style>

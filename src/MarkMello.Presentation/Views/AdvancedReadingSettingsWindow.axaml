@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MarkMello.Presentation.ViewModels"
+        xmlns:views="using:MarkMello.Presentation.Views"
+        x:Class="MarkMello.Presentation.Views.AdvancedReadingSettingsWindow"
+        x:DataType="vm:ShellViewModel"
+        Classes="mm-reading-settings-open"
+        Title="{Binding AdvancedReadingLabel}"
+        Width="592"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowDecorations="None"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        KeyDown="OnDialogKeyDown">
+  <Border Classes="mm-settings-panel mm-reading-panel" Margin="16">
+    <Grid RowDefinitions="Auto,*,Auto">
+      <Border Classes="mm-settings-head-shell" PointerPressed="OnHeaderPointerPressed">
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+          <TextBlock Classes="mm-settings-title"
+                     VerticalAlignment="Center"
+                     Text="{Binding AdvancedReadingHeader}" />
+          <Button Grid.Column="1" Classes="mm-settings-close"
+                  Click="OnCloseClick"
+                  ToolTip.Tip="{Binding OverlayCloseSettings}">
+            <Path Data="M0,0 L10,10 M10,0 L0,10"
+                  Stroke="{DynamicResource MmTextFaintBrush}"
+                  StrokeThickness="1.4"
+                  StrokeLineCap="Round" />
+          </Button>
+        </Grid>
+      </Border>
+      <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled"
+                    VerticalScrollBarVisibility="Auto">
+        <Border Classes="mm-settings-body-shell">
+          <StackPanel Spacing="0">
+            <views:ReadingFontSettingsView />
+            <views:ReadingTypographyControlsView />
+            <views:ReadingLetterSpacingView />
+            <views:InterfaceFontSizeSettingsView />
+          </StackPanel>
+        </Border>
+      </ScrollViewer>
+      <Border Grid.Row="2" Classes="mm-settings-body-shell">
+        <Button Classes="ghost" HorizontalAlignment="Right"
+                Command="{Binding ResetReadingSettingsCommand}"
+                Content="{Binding ResetReadingSettingsLabel}" />
+      </Border>
+    </Grid>
+  </Border>
+</Window>
