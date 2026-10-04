@@ -65,6 +65,23 @@ Edit mode is deliberately behind a single action. Press `Ctrl+E` or click the ed
 
 When you leave edit mode, MarkMello returns to the clean reading view it started with.
 
+## Alerts
+
+> [!NOTE]
+> Useful information to keep in mind while reading a document.
+
+> [!TIP]
+> A helpful suggestion for completing a task more easily.
+
+> [!IMPORTANT]
+> Essential information needed to complete a task successfully.
+
+> [!WARNING]
+> Pay attention to this warning to avoid problems.
+
+> [!CAUTION]
+> An action may have unwanted consequences or cause data loss.
+
 ## Diagrams
 
 Fenced ` ```mermaid ` blocks render inline as real diagrams — not as raw source. Rendering happens in-process; no WebView, Node, or network call.
