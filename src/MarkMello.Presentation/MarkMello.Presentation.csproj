@@ -23,6 +23,8 @@
     <AvaloniaResource Include="Assets\Fonts\**\*.ttf" />
     <AvaloniaResource Include="Assets\Icons\**\*.ico" />
     <AvaloniaResource Include="Assets\Images\**\*.png" />
+    <AvaloniaResource Include="..\..\assets\backgrounds\autumn\*.png"
+                      Link="Assets\Images\Welcome\%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

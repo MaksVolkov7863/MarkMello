@@ -8,6 +8,26 @@
              x:Class="MarkMello.Presentation.Views.WelcomeView"
              x:DataType="vm:ShellViewModel">
 
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <ImageBrush x:Key="MmWelcomeBackgroundBrush"
+                      Source="avares://MarkMello.Presentation/Assets/Images/Welcome/autumn-light.png"
+                      Stretch="UniformToFill" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <ImageBrush x:Key="MmWelcomeBackgroundBrush"
+                      Source="avares://MarkMello.Presentation/Assets/Images/Welcome/autumn-dark.png"
+                      Stretch="UniformToFill" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid Name="WelcomeBackgroundSurface"
+        Background="{DynamicResource MmWelcomeBackgroundBrush}"
+        ClipToBounds="True">
   <controls:WelcomePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"
                 MaxWidth="380">
@@ -101,5 +121,6 @@
       </StackPanel>
     </Button>
   </controls:WelcomePanel>
+  </Grid>
 
 </UserControl>
