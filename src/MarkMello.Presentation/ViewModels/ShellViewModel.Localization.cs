@@ -164,6 +164,7 @@ public partial class ShellViewModel
         nameof(WelcomeOpenFile),
         nameof(WelcomeOpenFolder),
         nameof(WelcomeTagline),
+        nameof(WelcomeSupport),
     ];
 
     public string AboutCreatedByPrefix => _localization["AboutCreatedByPrefix"];
@@ -314,11 +315,6 @@ public partial class ShellViewModel
     public string TitleBarRestore => _localization["TitleBarRestore"];
     public string UpdatesHint => _localization["UpdatesHint"];
     public string UpdatesLabel => _localization["UpdatesLabel"];
-    public string WelcomeCreateMd => _localization["WelcomeCreateMd"];
-    public string WelcomeDropHint => _localization["WelcomeDropHint"];
-    public string WelcomeOpenFile => _localization["WelcomeOpenFile"];
-    public string WelcomeOpenFolder => _localization["WelcomeOpenFolder"];
-    public string WelcomeTagline => _localization["WelcomeTagline"];
 
     public string WordCountStatusLabel => _localization.Format("StatusWordCount", WordCount);
 
@@ -385,37 +381,6 @@ public partial class ShellViewModel
             // Language persistence remains best-effort for the same reason
             // as the rest of the lightweight app settings.
         }
-    }
-
-    private void RefreshLocalizedProperties()
-    {
-        _languageOptions = CreateLanguageOptions();
-
-        NotifyLocalizedBindingPropertiesChanged();
-        EditorSession?.RefreshLocalizedProperties();
-
-        OnPropertyChanged(nameof(EditToggleLabel));
-        OnPropertyChanged(nameof(EditShortcutLabel));
-        OnPropertyChanged(nameof(NextThemeHint));
-        OnPropertyChanged(nameof(FindResultLabel));
-        OnPropertyChanged(nameof(UpdateActionHint));
-        OnPropertyChanged(nameof(CheckForUpdatesLabel));
-        OnPropertyChanged(nameof(DownloadUpdateLabel));
-        OnPropertyChanged(nameof(DownloadedUpdateActionLabel));
-        OnPropertyChanged(nameof(UpdateStateBadge));
-        OnPropertyChanged(nameof(IsSystemLanguageSelected));
-        OnPropertyChanged(nameof(IsEnglishLanguageSelected));
-        OnPropertyChanged(nameof(IsRussianLanguageSelected));
-        OnPropertyChanged(nameof(LanguageOptions));
-        OnPropertyChanged(nameof(SelectedLanguageOption));
-        OnPropertyChanged(nameof(WordCountStatusLabel));
-        OnPropertyChanged(nameof(ReadTimeStatusLabel));
-        OnPropertyChanged(nameof(FontSizeLabel));
-        OnPropertyChanged(nameof(LineHeightLabel));
-
-        RefreshDirtyPromptTexts();
-        RefreshLoadErrorTexts();
-        RefreshUpdateStatusTexts();
     }
 
     private void NotifyLocalizedBindingPropertiesChanged()

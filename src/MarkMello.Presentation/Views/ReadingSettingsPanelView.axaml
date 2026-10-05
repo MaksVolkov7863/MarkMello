@@ -2,14 +2,15 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="using:MarkMello.Presentation.Views"
              xmlns:vm="using:MarkMello.Presentation.ViewModels"
              mc:Ignorable="d"
              x:Class="MarkMello.Presentation.Views.ReadingSettingsPanelView"
              x:DataType="vm:ShellViewModel">
       <Border
               Classes="mm-settings-panel mm-popover-right mm-reading-panel"
-              Width="320">
-        <StackPanel>
+              Width="{DynamicResource MmReadingSettingsWidth}">
+        <Grid RowDefinitions="Auto,*">
           <Border Classes="mm-settings-head-shell">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
@@ -28,10 +29,12 @@
             </Grid>
           </Border>
 
+          <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled"
+                        VerticalScrollBarVisibility="Auto">
           <Border Classes="mm-settings-body-shell">
             <StackPanel Spacing="0">
               <Border Classes="mm-setting-row">
-                <Grid ColumnDefinitions="Auto,*"
+                <Grid ColumnDefinitions="*,Auto"
                       ColumnSpacing="12">
                   <StackPanel Grid.Column="0"
                               Spacing="2"
@@ -39,6 +42,7 @@
                     <TextBlock Classes="mm-setting-label"
                                Text="{Binding ReadingFontLabel}" />
                     <TextBlock Classes="mm-setting-hint"
+                               TextWrapping="Wrap"
                                Text="{Binding ReadingFontHint}" />
                   </StackPanel>
                   <Border Grid.Column="1"
@@ -63,148 +67,18 @@
                 </Grid>
               </Border>
 
-              <StackPanel Spacing="0">
-                <Line Classes="mm-setting-divider"
-                      StartPoint="0,0.5"
-                      EndPoint="1,0.5" />
-                <Border Classes="mm-setting-row">
-                  <Grid ColumnDefinitions="Auto,*"
-                        ColumnSpacing="12">
-                    <StackPanel Grid.Column="0"
-                                Spacing="2"
-                                VerticalAlignment="Center">
-                      <TextBlock Classes="mm-setting-label"
-                                 Text="{Binding ReadingSizeLabel}" />
-                      <TextBlock Classes="mm-setting-hint"
-                                 Text="{Binding ReadingSizeHint}" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
-                                Spacing="10"
-                                                  VerticalAlignment="Center">
-                      <Slider Classes="mm-settings-slider"
-                              Minimum="14"
-                              Maximum="24"
-                              TickFrequency="1"
-                              IsSnapToTickEnabled="True"
-                              Value="{Binding FontSizeSetting, Mode=TwoWay}" />
-                      <TextBlock Classes="mm-slider-value"
-                                 Text="{Binding FontSizeLabel}" />
-                    </StackPanel>
-                  </Grid>
-                </Border>
-              </StackPanel>
-
-              <StackPanel Spacing="0">
-                <Line Classes="mm-setting-divider"
-                      StartPoint="0,0.5"
-                      EndPoint="1,0.5" />
-                <Border Classes="mm-setting-row">
-                  <Grid ColumnDefinitions="Auto,*"
-                        ColumnSpacing="12">
-                    <StackPanel Grid.Column="0"
-                                Spacing="2"
-                                VerticalAlignment="Center">
-                      <TextBlock Classes="mm-setting-label"
-                                 Text="{Binding ReadingLineHeightLabel}" />
-                      <TextBlock Classes="mm-setting-hint"
-                                 Text="{Binding ReadingLineHeightHint}" />
-                    </StackPanel>
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal"
-                                Spacing="10"
-                                                  VerticalAlignment="Center">
-                      <Slider Classes="mm-settings-slider"
-                              Minimum="1.4"
-                              Maximum="2.0"
-                              TickFrequency="0.05"
-                              IsSnapToTickEnabled="True"
-                              Value="{Binding LineHeightSetting, Mode=TwoWay}" />
-                      <TextBlock Classes="mm-slider-value"
-                                 Text="{Binding LineHeightLabel}" />
-                    </StackPanel>
-                  </Grid>
-                </Border>
-              </StackPanel>
-
-              <StackPanel Spacing="0">
-                <Line Classes="mm-setting-divider"
-                      StartPoint="0,0.5"
-                      EndPoint="1,0.5" />
-                <Border Classes="mm-setting-row">
-                  <Grid ColumnDefinitions="Auto,*"
-                        ColumnSpacing="12">
-                    <StackPanel Grid.Column="0"
-                                Spacing="2"
-                                VerticalAlignment="Center">
-                      <TextBlock Classes="mm-setting-label"
-                                 Text="{Binding ReadingWidthLabel}" />
-                      <TextBlock Classes="mm-setting-hint"
-                                 Text="{Binding ReadingWidthHint}" />
-                    </StackPanel>
-                    <Border Grid.Column="1"
-                            Classes="mm-segmented"
-                            HorizontalAlignment="Right">
-                      <StackPanel Orientation="Horizontal"
-                                  Spacing="1">
-                        <ToggleButton Classes="mm-segmented-item"
-                                      IsChecked="{Binding IsNarrowWidthSelected}">
-                          <TextBlock Text="{Binding ReadingWidthNarrow}" />
-                        </ToggleButton>
-                        <ToggleButton Classes="mm-segmented-item"
-                                      IsChecked="{Binding IsMediumWidthSelected}">
-                          <TextBlock Text="{Binding ReadingWidthMedium}" />
-                        </ToggleButton>
-                        <ToggleButton Classes="mm-segmented-item"
-                                      IsChecked="{Binding IsWideWidthSelected}">
-                          <TextBlock Text="{Binding ReadingWidthWide}" />
-                        </ToggleButton>
-                      </StackPanel>
-                    </Border>
-                  </Grid>
-                </Border>
-              </StackPanel>
-
-
-              <StackPanel Spacing="0">
-                <Line Classes="mm-setting-divider"
-                      StartPoint="0,0.5"
-                      EndPoint="1,0.5" />
-                <Border Classes="mm-setting-row">
-                  <Grid ColumnDefinitions="Auto,*"
-                        ColumnSpacing="12">
-                    <StackPanel Grid.Column="0"
-                                Spacing="2"
-                                VerticalAlignment="Center">
-                      <TextBlock Classes="mm-setting-label"
-                                 Text="{Binding ReadingMinimapLabel}" />
-                      <TextBlock Classes="mm-setting-hint"
-                                 Text="{Binding ReadingMinimapHint}" />
-                    </StackPanel>
-                    <Border Grid.Column="1"
-                            Classes="mm-segmented"
-                            HorizontalAlignment="Right">
-                      <StackPanel Orientation="Horizontal"
-                                  Spacing="1">
-                        <ToggleButton Classes="mm-segmented-item"
-                                      IsChecked="{Binding IsDocumentMinimapAutoSelected}">
-                          <TextBlock Text="{Binding ReadingMinimapAuto}" />
-                        </ToggleButton>
-                        <ToggleButton Classes="mm-segmented-item"
-                                      IsChecked="{Binding IsDocumentMinimapOnSelected}">
-                          <TextBlock Text="{Binding ReadingMinimapOn}" />
-                        </ToggleButton>
-                        <ToggleButton Classes="mm-segmented-item"
-                                      IsChecked="{Binding IsDocumentMinimapOffSelected}">
-                          <TextBlock Text="{Binding ReadingMinimapOff}" />
-                        </ToggleButton>
-                      </StackPanel>
-                    </Border>
-                  </Grid>
-                </Border>
-              </StackPanel>
+              <views:ReadingTypographyControlsView />
+              <views:ReadingLayoutSettingsView />
+              <Line Classes="mm-setting-divider" StartPoint="0,0.5" EndPoint="1,0.5" />
+              <Button Classes="mm-menu-item" Click="OnAdvancedSettingsClick">
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                  <TextBlock Classes="mm-setting-label" TextWrapping="Wrap" Text="{Binding AdvancedReadingLabel}" />
+                  <TextBlock Grid.Column="1" Classes="mm-setting-meta" Text="{Binding MetaOpen}" />
+                </Grid>
+              </Button>
             </StackPanel>
           </Border>
-        </StackPanel>
+          </ScrollViewer>
+        </Grid>
       </Border>
 </UserControl>

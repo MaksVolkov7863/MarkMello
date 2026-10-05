@@ -13,13 +13,24 @@ public sealed record ReadingPreferences(
     int FontSize,
     double LineHeight,
     int ContentWidth,
-    DocumentMinimapMode DocumentMinimapMode = DocumentMinimapMode.Auto)
+    DocumentMinimapMode DocumentMinimapMode = DocumentMinimapMode.Auto,
+    string? SerifFontFamily = null,
+    string? SansFontFamily = null,
+    string? MonoFontFamily = null,
+    double LetterSpacing = 0,
+    int InterfaceFontSize = ReadingPreferences.DefaultInterfaceFontSize)
 {
     public const int MinFontSize = 14;
     public const int MaxFontSize = 24;
     public const double MinLineHeight = 1.4;
     public const double MaxLineHeight = 2.0;
     public const double LineHeightStep = 0.05;
+    public const double MinLetterSpacing = 0;
+    public const double MaxLetterSpacing = 2;
+    public const double LetterSpacingStep = 0.1;
+    public const int DefaultInterfaceFontSize = 14;
+    public const int MinInterfaceFontSize = 11;
+    public const int MaxInterfaceFontSize = 18;
     public const int NarrowContentWidth = 640;
     public const int MediumContentWidth = 820;
     public const int WideContentWidth = 1080;
@@ -63,10 +74,44 @@ public sealed record ReadingPreferences(
             ? preferences.DocumentMinimapMode
             : Default.DocumentMinimapMode;
 
-        return new ReadingPreferences(fontFamily, fontSize, lineHeight, contentWidth, documentMinimapMode);
+        return new ReadingPreferences(
+            fontFamily, fontSize, lineHeight, contentWidth, documentMinimapMode,
+            NormalizeFontName(preferences.SerifFontFamily),
+            NormalizeFontName(preferences.SansFontFamily),
+            NormalizeFontName(preferences.MonoFontFamily),
+            NormalizeLetterSpacing(preferences.LetterSpacing),
+            Math.Clamp(preferences.InterfaceFontSize, MinInterfaceFontSize, MaxInterfaceFontSize));
     }
 
     public ReadingPreferences Normalize() => Normalize(this);
+
+    public string? GetFontFamilyName(FontFamilyMode mode) => mode switch
+    {
+        FontFamilyMode.Sans => SansFontFamily,
+        FontFamilyMode.Mono => MonoFontFamily,
+        _ => SerifFontFamily
+    };
+
+    public ReadingPreferences WithFontFamilyName(FontFamilyMode mode, string? name) => mode switch
+    {
+        FontFamilyMode.Sans => this with { SansFontFamily = name },
+        FontFamilyMode.Mono => this with { MonoFontFamily = name },
+        _ => this with { SerifFontFamily = name }
+    };
+
+    private static string? NormalizeFontName(string? name)
+        => string.IsNullOrWhiteSpace(name) ? null : name.Trim();
+
+    private static double NormalizeLetterSpacing(double value)
+    {
+        if (!double.IsFinite(value))
+        {
+            return Default.LetterSpacing;
+        }
+
+        var clamped = Math.Clamp(value, MinLetterSpacing, MaxLetterSpacing);
+        return Math.Round(Math.Round(clamped / LetterSpacingStep) * LetterSpacingStep, 1);
+    }
 
     private static double NormalizeLineHeight(double value)
     {

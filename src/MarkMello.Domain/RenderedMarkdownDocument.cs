@@ -64,7 +64,10 @@ public sealed record MarkdownHeadingBlock(int Level, IReadOnlyList<MarkdownInlin
 
 public sealed record MarkdownParagraphBlock(IReadOnlyList<MarkdownInline> Inlines) : MarkdownBlock;
 
-public sealed record MarkdownQuoteBlock(IReadOnlyList<MarkdownBlock> Blocks) : MarkdownBlock;
+public sealed record MarkdownQuoteBlock(IReadOnlyList<MarkdownBlock> Blocks) : MarkdownBlock
+{
+    public MarkdownAlertKind? AlertKind { get; init; }
+}
 
 public sealed record MarkdownListBlock(bool IsOrdered, IReadOnlyList<MarkdownListItem> Items) : MarkdownBlock;
 

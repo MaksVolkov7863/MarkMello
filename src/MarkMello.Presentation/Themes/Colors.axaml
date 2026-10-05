@@ -40,6 +40,12 @@
       <SolidColorBrush x:Key="MmAccentBrush">#BD592F</SolidColorBrush>
       <!-- oklch(0.94 0.04 50) -->
       <SolidColorBrush x:Key="MmAccentSoftBrush">#FFE4D4</SolidColorBrush>
+      <!-- GitHub alerts: approved in the light/dark HTML preview. -->
+      <SolidColorBrush x:Key="MmAlertNoteBrush">#536F87</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertTipBrush">#5D7457</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertImportantBrush">#796788</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertWarningBrush">#956C23</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertCautionBrush">#BD592F</SolidColorBrush>
       <!-- oklch(0.95 0.008 75) -->
       <SolidColorBrush x:Key="MmCodeBackgroundBrush">#F2EEE9</SolidColorBrush>
       <!-- oklch(0.90 0.008 75) -->
@@ -83,6 +89,11 @@
       <SolidColorBrush x:Key="MmAccentBrush">#E38A67</SolidColorBrush>
       <!-- oklch(0.30 0.05 42) -->
       <SolidColorBrush x:Key="MmAccentSoftBrush">#432519</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertNoteBrush">#92AEC5</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertTipBrush">#A1B696</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertImportantBrush">#B9A7CA</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertWarningBrush">#D4B270</SolidColorBrush>
+      <SolidColorBrush x:Key="MmAlertCautionBrush">#E38A67</SolidColorBrush>
       <!-- oklch(0.22 0.010 60) -->
       <SolidColorBrush x:Key="MmCodeBackgroundBrush">#1E1A16</SolidColorBrush>
       <!-- oklch(0.28 0.010 60) -->

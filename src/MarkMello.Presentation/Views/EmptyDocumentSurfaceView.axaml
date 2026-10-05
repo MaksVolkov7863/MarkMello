@@ -14,12 +14,12 @@
               Spacing="10">
     <TextBlock Text="{Binding EmptySurfaceTitle}"
                FontFamily="{DynamicResource MmDocumentSerifFontFamily}"
-               FontSize="20"
+               FontSize="{DynamicResource MmUiFontSize20}"
                HorizontalAlignment="Center"
                Foreground="{DynamicResource MmTextFaintBrush}" />
     <TextBlock Text="{Binding EmptySurfaceHint}"
                FontFamily="{DynamicResource MmDocumentSansFontFamily}"
-               FontSize="13"
+               FontSize="{DynamicResource MmUiFontSize13}"
                LineHeight="21"
                TextAlignment="Center"
                TextWrapping="Wrap"

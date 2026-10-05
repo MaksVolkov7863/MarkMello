@@ -1,0 +1,31 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MarkMello.Presentation.ViewModels"
+             x:Class="MarkMello.Presentation.Views.ReadingFontSettingsView"
+             x:DataType="vm:ShellViewModel">
+  <ItemsControl ItemsSource="{Binding DocumentFonts}">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate x:DataType="vm:DocumentFontSetting">
+        <Border Classes="mm-setting-row">
+          <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+            <TextBlock Classes="mm-setting-label" Text="{Binding Label}"
+                       VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Spacing="2">
+              <ComboBox Classes="mm-language-select" Width="280"
+                        ItemsSource="{Binding Options}"
+                        SelectedItem="{Binding SelectedOption, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:DocumentFontOption">
+                    <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <TextBlock Classes="mm-setting-hint" Text="{Binding Hint}" MaxWidth="280"
+                         TextWrapping="Wrap" />
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>

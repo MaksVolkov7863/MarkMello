@@ -394,6 +394,10 @@ public partial class ViewerView : UserControl, IFindHost
         if (_viewModel is not null)
         {
             _viewModel.PropertyChanged -= OnViewModelPropertyChanged;
+            if (_viewModel.CommitActiveInlineEditor == CommitActiveInlineEditor)
+            {
+                _viewModel.CommitActiveInlineEditor = null;
+            }
         }
 
         _viewModel = viewModel;
@@ -401,7 +405,13 @@ public partial class ViewerView : UserControl, IFindHost
         if (_viewModel is not null)
         {
             _viewModel.PropertyChanged += OnViewModelPropertyChanged;
+            _viewModel.CommitActiveInlineEditor = CommitActiveInlineEditor;
         }
+    }
+
+    private void CommitActiveInlineEditor()
+    {
+        _documentView?.CommitQuickEditor();
     }
 
     private void OnViewModelPropertyChanged(object? sender, PropertyChangedEventArgs e)

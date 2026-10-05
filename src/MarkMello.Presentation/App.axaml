@@ -6,7 +6,9 @@
 
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://MarkMello.Presentation/Themes/InterfaceTypography.axaml" />
     <StyleInclude Source="avares://MarkMello.Presentation/Themes/Controls.axaml" />
+    <StyleInclude Source="avares://MarkMello.Presentation/Themes/WelcomeSupport.axaml" />
   </Application.Styles>
 
   <Application.Resources>
@@ -14,6 +16,7 @@
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="avares://MarkMello.Presentation/Themes/Colors.axaml" />
         <ResourceInclude Source="avares://MarkMello.Presentation/Themes/Typography.axaml" />
+        <ResourceInclude Source="avares://MarkMello.Presentation/Themes/WindowDecorations.axaml" />
       </ResourceDictionary.MergedDictionaries>
       <localization:LocalizationService x:Key="Localization" />
     </ResourceDictionary>

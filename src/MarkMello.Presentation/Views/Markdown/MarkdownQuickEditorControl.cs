@@ -124,10 +124,11 @@ public sealed class MarkdownQuickEditorControl : TextBox
             }
         }
 
-        if (e.Key == Key.S && (e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0)
+        var hasCmd = (e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0;
+        if (hasCmd && (e.Key == Key.S || e.Key == Key.Tab || e.Key == Key.E))
         {
             RequestCommit();
-            // Don't mark as handled so window KeyBinding Ctrl+S can trigger SaveCommand
+            // Don't mark as handled so window KeyBindings (Save, NextTab, ToggleEditMode) can trigger
             return;
         }
 

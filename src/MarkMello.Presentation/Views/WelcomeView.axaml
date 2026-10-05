@@ -3,11 +3,32 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vm="using:MarkMello.Presentation.ViewModels"
+             xmlns:controls="using:MarkMello.Presentation.Controls"
              mc:Ignorable="d"
              x:Class="MarkMello.Presentation.Views.WelcomeView"
              x:DataType="vm:ShellViewModel">
 
-  <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+  <UserControl.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <ImageBrush x:Key="MmWelcomeBackgroundBrush"
+                      Source="avares://MarkMello.Presentation/Assets/Images/Welcome/autumn-light.png"
+                      Stretch="UniformToFill" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <ImageBrush x:Key="MmWelcomeBackgroundBrush"
+                      Source="avares://MarkMello.Presentation/Assets/Images/Welcome/autumn-dark.png"
+                      Stretch="UniformToFill" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </UserControl.Resources>
+
+  <Grid Name="WelcomeBackgroundSurface"
+        Background="{DynamicResource MmWelcomeBackgroundBrush}"
+        ClipToBounds="True">
+  <controls:WelcomePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="6"
                 MaxWidth="380">
 
@@ -19,7 +40,7 @@
 
       <!-- Logo: "Mark" + accent "Mello", bold, no italic -->
       <TextBlock FontFamily="{DynamicResource MmDocumentSerifFontFamily}"
-                 FontSize="44"
+                 FontSize="{DynamicResource MmUiFontSize44}"
                  FontWeight="Bold"
                  HorizontalAlignment="Center"
                  Foreground="{DynamicResource MmTextBrush}">
@@ -30,7 +51,7 @@
 
       <TextBlock Text="{Binding WelcomeTagline}"
                  FontFamily="{DynamicResource MmDocumentSansFontFamily}"
-                 FontSize="13"
+                 FontSize="{DynamicResource MmUiFontSize13}"
                  HorizontalAlignment="Center"
                  Foreground="{DynamicResource MmTextFaintBrush}"
                  Margin="0,0,0,28" />
@@ -73,18 +94,33 @@
       <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center"
                   Margin="0,28,0,0">
         <Border Classes="kbd">
-          <TextBlock Text="Ctrl" FontFamily="{DynamicResource MmDocumentMonoFontFamily}" FontSize="10" />
+          <TextBlock Text="Ctrl" FontFamily="{DynamicResource MmDocumentMonoFontFamily}" FontSize="{DynamicResource MmUiFontSize10}" />
         </Border>
         <Border Classes="kbd">
-          <TextBlock Text="O" FontFamily="{DynamicResource MmDocumentMonoFontFamily}" FontSize="10" />
+          <TextBlock Text="O" FontFamily="{DynamicResource MmDocumentMonoFontFamily}" FontSize="{DynamicResource MmUiFontSize10}" />
         </Border>
         <TextBlock Text="{Binding WelcomeDropHint}"
-                   FontSize="11"
+                   FontSize="{DynamicResource MmUiFontSize11}"
                    Foreground="{DynamicResource MmTextFaintBrush}"
                    VerticalAlignment="Center" />
       </StackPanel>
 
     </StackPanel>
+    <Button Classes="welcome-support"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Bottom"
+            Margin="0,0,0,40"
+            Click="OnSupportClick">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Path Data="M7 12.25C7 12.25 1.5 9.1 1.5 5.1C1.5 3.3 2.9 2 4.5 2C5.6 2 6.5 2.6 7 3.5C7.5 2.6 8.4 2 9.5 2C11.1 2 12.5 3.3 12.5 5.1C12.5 9.1 7 12.25 7 12.25Z"
+              Width="14"
+              Height="14"
+              VerticalAlignment="Center" />
+        <TextBlock Text="{Binding WelcomeSupport}"
+                   VerticalAlignment="Center" />
+      </StackPanel>
+    </Button>
+  </controls:WelcomePanel>
   </Grid>
 
 </UserControl>

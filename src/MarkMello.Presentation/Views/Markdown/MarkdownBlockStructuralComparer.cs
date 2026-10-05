@@ -15,7 +15,7 @@ namespace MarkMello.Presentation.Views.Markdown;
 /// последующих блоков, но не их визуальное представление — сдвиг переносится на
 /// готовые контролы отдельно.
 /// </summary>
-internal sealed class MarkdownBlockStructuralComparer : IEqualityComparer<MarkdownBlock>
+internal sealed partial class MarkdownBlockStructuralComparer : IEqualityComparer<MarkdownBlock>
 {
     public static MarkdownBlockStructuralComparer Instance { get; } = new();
 
@@ -43,6 +43,7 @@ internal sealed class MarkdownBlockStructuralComparer : IEqualityComparer<Markdo
             MarkdownParagraphBlock paragraph => y is MarkdownParagraphBlock other
                 && InlinesEqual(paragraph.Inlines, other.Inlines),
             MarkdownQuoteBlock quote => y is MarkdownQuoteBlock other
+                && quote.AlertKind == other.AlertKind
                 && BlocksEqual(quote.Blocks, other.Blocks),
             MarkdownListBlock list => y is MarkdownListBlock other
                 && list.IsOrdered == other.IsOrdered
@@ -90,6 +91,7 @@ internal sealed class MarkdownBlockStructuralComparer : IEqualityComparer<Markdo
                 AddInlines(ref hash, paragraph.Inlines);
                 break;
             case MarkdownQuoteBlock quote:
+                hash.Add(quote.AlertKind);
                 AddBlocks(ref hash, quote.Blocks);
                 break;
             case MarkdownListBlock list:
@@ -250,57 +252,5 @@ internal sealed class MarkdownBlockStructuralComparer : IEqualityComparer<Markdo
                 && InlinesEqual(a.Inlines, b.Inlines),
             _ => false
         };
-    }
-
-    private static void AddBlocks(ref HashCode hash, IReadOnlyList<MarkdownBlock> blocks)
-    {
-        hash.Add(blocks.Count);
-        foreach (var block in blocks)
-        {
-            hash.Add(Instance.GetHashCode(block));
-        }
-    }
-
-    private static void AddCells(ref HashCode hash, IReadOnlyList<MarkdownTableCell> cells)
-    {
-        hash.Add(cells.Count);
-        foreach (var cell in cells)
-        {
-            AddInlines(ref hash, cell.Inlines);
-        }
-    }
-
-    private static void AddInlines(ref HashCode hash, IReadOnlyList<MarkdownInline> inlines)
-    {
-        hash.Add(inlines.Count);
-        foreach (var inline in inlines)
-        {
-            hash.Add(inline.GetType());
-            switch (inline)
-            {
-                case MarkdownTextInline text:
-                    hash.Add(text.Text, StringComparer.Ordinal);
-                    break;
-                case MarkdownCodeInline code:
-                    hash.Add(code.Code, StringComparer.Ordinal);
-                    break;
-                case MarkdownStrongInline strong:
-                    AddInlines(ref hash, strong.Inlines);
-                    break;
-                case MarkdownEmphasisInline emphasis:
-                    AddInlines(ref hash, emphasis.Inlines);
-                    break;
-                case MarkdownImageInline image:
-                    hash.Add(image.Url, StringComparer.Ordinal);
-                    hash.Add(image.AltText, StringComparer.Ordinal);
-                    break;
-                case MarkdownLinkInline link:
-                    hash.Add(link.Url, StringComparer.Ordinal);
-                    AddInlines(ref hash, link.Inlines);
-                    break;
-                default:
-                    break;
-            }
-        }
     }
 }

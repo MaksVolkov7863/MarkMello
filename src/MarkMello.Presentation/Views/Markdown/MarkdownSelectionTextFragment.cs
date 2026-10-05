@@ -10,7 +10,7 @@ using MarkMello.Domain;
 
 namespace MarkMello.Presentation.Views.Markdown;
 
-internal sealed class MarkdownSelectionTextFragment : MarkdownDocumentSelectionFragmentBase
+internal sealed partial class MarkdownSelectionTextFragment : MarkdownDocumentSelectionFragmentBase
 {
     private MarkdownStyledText _styledText = MarkdownStyledText.Empty;
     private readonly Dictionary<int, MarkdownInlineImageState> _inlineImages = [];
@@ -422,45 +422,6 @@ internal sealed class MarkdownSelectionTextFragment : MarkdownDocumentSelectionF
 
         y = rects[0].Y;
         return true;
-    }
-
-    private MarkdownFormattedTextLayout GetOrCreateTextLayout(double availableWidth)
-    {
-        var normalizedWidth = NormalizeLayoutWidth(availableWidth);
-        if (_textLayout is not null && Math.Abs(_layoutWidth - normalizedWidth) < 0.5)
-        {
-            return _textLayout;
-        }
-
-        InvalidateTextLayout();
-        _layoutWidth = normalizedWidth;
-        _textLayout = new MarkdownFormattedTextLayout(
-            StyledText,
-            _inlineImages,
-            BaseFontFamily,
-            ResolveInlineCodeFontFamily(),
-            BaseFontSize,
-            BaseFontWeight,
-            BaseFontStyle,
-            double.IsNaN(BaseLineHeight) ? double.NaN : BaseLineHeight,
-            _letterSpacing,
-            LayoutTextWrapping,
-            normalizedWidth,
-            ResolveBaseTextBrush(),
-            BuildLinkTextDecorations());
-
-        return _textLayout;
-    }
-
-    private FontFamily ResolveInlineCodeFontFamily()
-    {
-        if (this.TryFindResource("MmDocumentMonoFontFamily", ActualThemeVariant, out var value)
-            && value is FontFamily family)
-        {
-            return family;
-        }
-
-        return new FontFamily("JetBrains Mono, Cascadia Code, Consolas, Menlo, monospace");
     }
 
     /// <summary>

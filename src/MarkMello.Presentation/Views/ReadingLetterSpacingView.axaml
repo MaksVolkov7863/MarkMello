@@ -1,0 +1,27 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:MarkMello.Presentation.ViewModels"
+             xmlns:domain="using:MarkMello.Domain"
+             x:Class="MarkMello.Presentation.Views.ReadingLetterSpacingView"
+             x:DataType="vm:ShellViewModel">
+  <StackPanel Spacing="0">
+    <Line Classes="mm-setting-divider" StartPoint="0,0.5" EndPoint="1,0.5" />
+    <Border Classes="mm-setting-row">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <StackPanel Spacing="2" VerticalAlignment="Center">
+          <TextBlock Classes="mm-setting-label" TextWrapping="Wrap" Text="{Binding ReadingLetterSpacingLabel}" />
+          <TextBlock Classes="mm-setting-hint" TextWrapping="Wrap" Text="{Binding ReadingLetterSpacingHint}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <Slider Classes="mm-settings-slider"
+                  Minimum="{x:Static domain:ReadingPreferences.MinLetterSpacing}"
+                  Maximum="{x:Static domain:ReadingPreferences.MaxLetterSpacing}"
+                  TickFrequency="{x:Static domain:ReadingPreferences.LetterSpacingStep}"
+                  IsSnapToTickEnabled="True"
+                  Value="{Binding LetterSpacingSetting, Mode=TwoWay}" />
+          <TextBlock Classes="mm-slider-value" Text="{Binding LetterSpacingLabel}" />
+        </StackPanel>
+      </Grid>
+    </Border>
+  </StackPanel>
+</UserControl>

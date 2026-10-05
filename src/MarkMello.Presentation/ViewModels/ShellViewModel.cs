@@ -247,6 +247,8 @@ public partial class ShellViewModel : ObservableObject
         ? string.Empty
         : FileName + (IsDirty ? " •" : string.Empty);
 
+    public Action? CommitActiveInlineEditor { get; set; }
+
     public bool HasDocumentTitle => State == ViewState.Viewing && !string.IsNullOrWhiteSpace(FileName);
 
     public bool IsWelcome => State == ViewState.NoDocument && !ShowsSidebar;
@@ -322,168 +324,6 @@ public partial class ShellViewModel : ObservableObject
     public string AboutLicense => _aboutLicense;
 
     public bool HasDirtyPromptError => !string.IsNullOrWhiteSpace(DirtyPromptErrorMessage);
-
-    public FontFamilyMode SelectedFontFamilyMode
-    {
-        get => ReadingPreferences.FontFamily;
-        set
-        {
-            if (ReadingPreferences.FontFamily == value)
-            {
-                return;
-            }
-
-            ApplyReadingPreferences(ReadingPreferences with { FontFamily = value });
-        }
-    }
-
-    public double FontSizeSetting
-    {
-        get => ReadingPreferences.FontSize;
-        set
-        {
-            var fontSize = (int)Math.Round(value, MidpointRounding.AwayFromZero);
-            if (ReadingPreferences.FontSize == fontSize)
-            {
-                return;
-            }
-
-            ApplyReadingPreferences(ReadingPreferences with { FontSize = fontSize });
-        }
-    }
-
-    public double LineHeightSetting
-    {
-        get => ReadingPreferences.LineHeight;
-        set
-        {
-            var normalized = Math.Round(
-                value / ReadingPreferences.LineHeightStep,
-                MidpointRounding.AwayFromZero) * ReadingPreferences.LineHeightStep;
-
-            if (Math.Abs(ReadingPreferences.LineHeight - normalized) < 0.0001)
-            {
-                return;
-            }
-
-            ApplyReadingPreferences(ReadingPreferences with { LineHeight = normalized });
-        }
-    }
-
-    public double DocumentColumnMaxWidth => ReadingLayoutMetrics.GetDocumentColumnMaxWidth(ReadingPreferences);
-
-    public double ContentWidthSetting
-    {
-        get => ReadingPreferences.ContentWidth;
-        set
-        {
-            var contentWidth = (int)Math.Round(
-                value / ReadingPreferences.ContentWidthStep,
-                MidpointRounding.AwayFromZero) * ReadingPreferences.ContentWidthStep;
-
-            if (ReadingPreferences.ContentWidth == contentWidth)
-            {
-                return;
-            }
-
-            ApplyReadingPreferences(ReadingPreferences with { ContentWidth = contentWidth });
-        }
-    }
-
-    public string FontSizeLabel => $"{ReadingPreferences.FontSize}px";
-
-    public string LineHeightLabel => ReadingPreferences.LineHeight.ToString("0.00", _localization.Culture);
-
-    public bool IsSerifFontSelected
-    {
-        get => ReadingPreferences.FontFamily == FontFamilyMode.Serif;
-        set
-        {
-            if (!value)
-            {
-                OnPropertyChanged(nameof(IsSerifFontSelected));
-                return;
-            }
-
-            SelectedFontFamilyMode = FontFamilyMode.Serif;
-        }
-    }
-
-    public bool IsSansFontSelected
-    {
-        get => ReadingPreferences.FontFamily == FontFamilyMode.Sans;
-        set
-        {
-            if (!value)
-            {
-                OnPropertyChanged(nameof(IsSansFontSelected));
-                return;
-            }
-
-            SelectedFontFamilyMode = FontFamilyMode.Sans;
-        }
-    }
-
-    public bool IsMonoFontSelected
-    {
-        get => ReadingPreferences.FontFamily == FontFamilyMode.Mono;
-        set
-        {
-            if (!value)
-            {
-                OnPropertyChanged(nameof(IsMonoFontSelected));
-                return;
-            }
-
-            SelectedFontFamilyMode = FontFamilyMode.Mono;
-        }
-    }
-
-    public bool IsNarrowWidthSelected
-    {
-        get => ReadingPreferences.ContentWidth == ReadingPreferences.NarrowContentWidth;
-        set
-        {
-            if (!value)
-            {
-                OnPropertyChanged(nameof(IsNarrowWidthSelected));
-                return;
-            }
-
-            ContentWidthSetting = ReadingPreferences.NarrowContentWidth;
-        }
-    }
-
-    public bool IsMediumWidthSelected
-    {
-        get => ReadingPreferences.ContentWidth == ReadingPreferences.MediumContentWidth;
-        set
-        {
-            if (!value)
-            {
-                OnPropertyChanged(nameof(IsMediumWidthSelected));
-                return;
-            }
-
-            ContentWidthSetting = ReadingPreferences.MediumContentWidth;
-        }
-    }
-
-    public bool IsWideWidthSelected
-    {
-        get => ReadingPreferences.ContentWidth == ReadingPreferences.WideContentWidth;
-        set
-        {
-            if (!value)
-            {
-                OnPropertyChanged(nameof(IsWideWidthSelected));
-                return;
-            }
-
-            ContentWidthSetting = ReadingPreferences.WideContentWidth;
-        }
-    }
-
 
     /// <summary>
     /// Рамка окна. Хранится отдельно от <see cref="ReadingPreferences"/>: это
@@ -708,6 +548,8 @@ public partial class ShellViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanToggleEditMode))]
     private async Task ToggleEditModeAsync()
     {
+        CommitActiveInlineEditor?.Invoke();
+
         if (IsEditMode)
         {
             await RunWithDirtyCheckAsync(
@@ -726,6 +568,7 @@ public partial class ShellViewModel : ObservableObject
     private async Task SaveAsync()
     {
         CloseOverlayCore();
+        CommitActiveInlineEditor?.Invoke();
         var outcome = await SaveEditorAsync(promptForPathWhenMissing: true, forceSaveAs: false).ConfigureAwait(true);
         if (outcome.Cancelled)
         {
@@ -747,6 +590,7 @@ public partial class ShellViewModel : ObservableObject
     private async Task SaveAsAsync()
     {
         CloseOverlayCore();
+        CommitActiveInlineEditor?.Invoke();
         var outcome = await SaveEditorAsync(promptForPathWhenMissing: true, forceSaveAs: true).ConfigureAwait(true);
         if (outcome.Cancelled)
         {
@@ -1094,37 +938,6 @@ public partial class ShellViewModel : ObservableObject
         RefreshDocumentSummary();
         RefreshWindowTitle();
         UpdateCommandStates();
-    }
-
-    partial void OnReadingPreferencesChanged(ReadingPreferences value)
-    {
-        var documentRenderingPreferences = GetDocumentRenderingPreferences(value);
-        var documentRenderingPreferencesChanged = documentRenderingPreferences != _documentReadingPreferences;
-        _documentReadingPreferences = documentRenderingPreferences;
-
-        if (documentRenderingPreferencesChanged)
-        {
-            EditorSession?.UpdateReadingPreferences(value);
-            OnPropertyChanged(nameof(DocumentReadingPreferences));
-        }
-
-        OnPropertyChanged(nameof(SelectedFontFamilyMode));
-        OnPropertyChanged(nameof(FontSizeSetting));
-        OnPropertyChanged(nameof(LineHeightSetting));
-        OnPropertyChanged(nameof(ContentWidthSetting));
-        OnPropertyChanged(nameof(DocumentColumnMaxWidth));
-        OnPropertyChanged(nameof(FontSizeLabel));
-        OnPropertyChanged(nameof(LineHeightLabel));
-        OnPropertyChanged(nameof(IsSerifFontSelected));
-        OnPropertyChanged(nameof(IsSansFontSelected));
-        OnPropertyChanged(nameof(IsMonoFontSelected));
-        OnPropertyChanged(nameof(IsNarrowWidthSelected));
-        OnPropertyChanged(nameof(IsMediumWidthSelected));
-        OnPropertyChanged(nameof(IsWideWidthSelected));
-        OnPropertyChanged(nameof(SelectedDocumentMinimapMode));
-        OnPropertyChanged(nameof(IsDocumentMinimapAutoSelected));
-        OnPropertyChanged(nameof(IsDocumentMinimapOnSelected));
-        OnPropertyChanged(nameof(IsDocumentMinimapOffSelected));
     }
 
     private async Task OpenFileCoreAsync()
@@ -1573,40 +1386,6 @@ public partial class ShellViewModel : ObservableObject
         Theme = mode;
         _themeService.Apply(mode);
         EffectiveTheme = _themeService.GetEffectiveTheme();
-    }
-
-    private static ReadingPreferences GetDocumentRenderingPreferences(ReadingPreferences preferences)
-    {
-        var normalized = ReadingPreferences.Normalize(preferences);
-        return normalized with { DocumentMinimapMode = ReadingPreferences.Default.DocumentMinimapMode };
-    }
-
-    private void ApplyReadingPreferences(ReadingPreferences preferences)
-    {
-        var normalized = ReadingPreferences.Normalize(preferences);
-        if (normalized == ReadingPreferences)
-        {
-            return;
-        }
-
-        ReadingPreferences = normalized;
-        PersistReadingPreferences(normalized);
-    }
-
-    private void PersistReadingPreferences(ReadingPreferences preferences)
-    {
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await _settings.SavePreferencesAsync(preferences).ConfigureAwait(false);
-            }
-            catch
-            {
-                // Persistence remains best-effort; failed saving of reading
-                // preferences must never interrupt the viewer or editor loop.
-            }
-        });
     }
 
     private void OnEditorSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)

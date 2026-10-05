@@ -12,7 +12,7 @@ namespace MarkMello.Presentation.Views.Markdown;
 /// <summary>
 /// Управляет жизненным циклом инлайн-редактора блока в режиме просмотра Markdown-документа.
 /// </summary>
-public sealed class MarkdownQuickInlineEditingController
+internal sealed class MarkdownQuickInlineEditingController
 {
     private readonly MarkdownDocumentView _owner;
     private MarkdownQuickEditorControl? _activeQuickEditor;

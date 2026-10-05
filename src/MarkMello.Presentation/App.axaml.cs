@@ -4,6 +4,8 @@ using Avalonia.Markup.Xaml;
 using MarkMello.Application.Abstractions;
 using MarkMello.Domain.Diagnostics;
 using MarkMello.Presentation.Localization;
+using MarkMello.Presentation.Services;
+using MarkMello.Domain;
 using MarkMello.Presentation.Views;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,6 +28,7 @@ public partial class App : global::Avalonia.Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        InterfaceTypography.Apply(Resources, ReadingPreferences.DefaultInterfaceFontSize);
 
         var localization = Services?.GetService<ILocalizationService>() ?? new LocalizationService();
         Resources["Localization"] = localization;

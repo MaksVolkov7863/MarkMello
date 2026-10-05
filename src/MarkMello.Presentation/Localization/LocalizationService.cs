@@ -8,10 +8,6 @@ public sealed partial class LocalizationService : ObservableObject, ILocalizatio
 {
     private static readonly Dictionary<string, string> English = new(StringComparer.Ordinal)
     {
-        ["WelcomeTagline"] = "A quiet place to read Markdown.",
-        ["WelcomeCreateMd"] = "Create MD",
-        ["WelcomeOpenFile"] = "Open file...",
-        ["WelcomeDropHint"] = "or drop a .md file or a folder here",
         ["TitleBarMinimize"] = "Minimize",
         ["TitleBarMaximize"] = "Maximize",
         ["TitleBarRestore"] = "Restore",
@@ -191,7 +187,6 @@ public sealed partial class LocalizationService : ObservableObject, ILocalizatio
         ["AppMenuOpenFolderHint"] = "Show the file tree on the left",
         ["AppMenuCloseFolderLabel"] = "Close Folder",
         ["AppMenuCloseFolderHint"] = "Back to single-file viewing",
-        ["WelcomeOpenFolder"] = "Open Folder…",
         ["SidebarTooltip"] = "Files in this folder",
         ["TreeNodeMissing"] = "Folder is gone",
         ["TreeNodeAccessDenied"] = "Access denied",
@@ -209,10 +204,6 @@ public sealed partial class LocalizationService : ObservableObject, ILocalizatio
 
     private static readonly Dictionary<string, string> Russian = new(StringComparer.Ordinal)
     {
-        ["WelcomeTagline"] = "Тихое место для чтения Markdown.",
-        ["WelcomeCreateMd"] = "Создать MD",
-        ["WelcomeOpenFile"] = "Открыть файл...",
-        ["WelcomeDropHint"] = "или перетащите сюда .md файл или папку",
         ["TitleBarMinimize"] = "Свернуть",
         ["TitleBarMaximize"] = "Развернуть",
         ["TitleBarRestore"] = "Восстановить",
@@ -392,7 +383,6 @@ public sealed partial class LocalizationService : ObservableObject, ILocalizatio
         ["AppMenuOpenFolderHint"] = "Показать структуру файлов слева",
         ["AppMenuCloseFolderLabel"] = "Закрыть папку",
         ["AppMenuCloseFolderHint"] = "Вернуться к обычному просмотру",
-        ["WelcomeOpenFolder"] = "Открыть папку…",
         ["SidebarTooltip"] = "Файлы этой папки",
         ["TreeNodeMissing"] = "Папка исчезла",
         ["TreeNodeAccessDenied"] = "Доступ запрещён",
