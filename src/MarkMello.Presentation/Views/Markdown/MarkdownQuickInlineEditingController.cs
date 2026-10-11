@@ -21,6 +21,8 @@ internal sealed class MarkdownQuickInlineEditingController
     private int _quickEditorCharStart;
     private int _quickEditorCharEnd;
     private string _quickEditorOriginalBlockText = string.Empty;
+    private string? _quickEditorSourceSnapshot;
+    private RenderedMarkdownDocument? _quickEditorDocumentSnapshot;
     private bool _isCommittingQuickEditor;
 
     public MarkdownQuickInlineEditingController(MarkdownDocumentView owner)
@@ -159,7 +161,7 @@ internal sealed class MarkdownQuickInlineEditingController
 
         // If block has a markdown prefix like "# " or "- " or "> " not in the rendered fragment text,
         // offset the caret position into the raw markdown text accordingly
-        if (targetControl is not null && !string.IsNullOrEmpty(blockText))
+        if (!string.IsNullOrEmpty(blockText))
         {
             var prefixLen = 0;
             while (prefixLen < blockText.Length && (blockText[prefixLen] == '#' || blockText[prefixLen] == '>' || blockText[prefixLen] == '-' || blockText[prefixLen] == '*' || blockText[prefixLen] == ' ' || char.IsDigit(blockText[prefixLen]) || blockText[prefixLen] == '.'))
@@ -183,6 +185,8 @@ internal sealed class MarkdownQuickInlineEditingController
         _quickEditorCharStart = charStart;
         _quickEditorCharEnd = charEnd;
         _quickEditorOriginalBlockText = blockText;
+        _quickEditorSourceSnapshot = _owner.SourceText;
+        _quickEditorDocumentSnapshot = _owner.Document;
         _activeQuickEditor = editor;
 
         targetControl.IsVisible = false;
@@ -224,20 +228,30 @@ internal sealed class MarkdownQuickInlineEditingController
             var charStart = _quickEditorCharStart;
             var charEnd = _quickEditorCharEnd;
             var originalText = _quickEditorOriginalBlockText;
+            var sourceSnapshot = _quickEditorSourceSnapshot;
+            var documentSnapshot = _quickEditorDocumentSnapshot;
             var source = _owner.SourceText;
 
-            _activeQuickEditor = null;
-            _quickEditorTargetControl = null;
-            _quickEditorParentPanel = null;
+            ResetEditorState();
 
             parentPanel.Children.Remove(editor);
             targetControl.IsVisible = true;
 
-            if (!string.IsNullOrEmpty(source) && !string.Equals(newBlockText, originalText, StringComparison.Ordinal))
+            if (string.IsNullOrEmpty(source) || string.Equals(newBlockText, originalText, StringComparison.Ordinal))
             {
-                var newFullText = MarkdownSourceBlockLocator.ReplaceRange(source, charStart, charEnd, newBlockText);
-                _owner.RaiseDocumentContentEdited(newFullText);
+                return;
             }
+
+            // Смещения charStart/charEnd посчитаны по снимку исходника на момент открытия редактора.
+            // Если документ уже сменился (другая вкладка, перечитывание, новый файл), применять их
+            // к текущему тексту нельзя: правка попадёт не туда. Такую правку безопасно отбрасываем.
+            if (!IsSnapshotStillCurrent(source, sourceSnapshot, _owner.Document, documentSnapshot, charStart, charEnd, originalText))
+            {
+                return;
+            }
+
+            var newFullText = MarkdownSourceBlockLocator.ReplaceRange(source, charStart, charEnd, newBlockText);
+            _owner.RaiseDocumentContentEdited(newFullText, source);
         }
         finally
         {
@@ -256,12 +270,49 @@ internal sealed class MarkdownQuickInlineEditingController
         var targetControl = _quickEditorTargetControl;
         var parentPanel = _quickEditorParentPanel;
 
-        _activeQuickEditor = null;
-        _quickEditorTargetControl = null;
-        _quickEditorParentPanel = null;
+        ResetEditorState();
 
         parentPanel.Children.Remove(editor);
         targetControl.IsVisible = true;
+    }
+
+    private void ResetEditorState()
+    {
+        _activeQuickEditor = null;
+        _quickEditorTargetControl = null;
+        _quickEditorParentPanel = null;
+        _quickEditorSourceSnapshot = null;
+        _quickEditorDocumentSnapshot = null;
+    }
+
+    /// <summary>
+    /// Правку можно применить, только если редактор всё ещё относится к тому же исходнику:
+    /// либо текст совпадает со снимком целиком, либо документ тот же, а блок по сохранённым
+    /// смещениям не изменился.
+    /// </summary>
+    internal static bool IsSnapshotStillCurrent(
+        string source,
+        string? sourceSnapshot,
+        RenderedMarkdownDocument? currentDocument,
+        RenderedMarkdownDocument? documentSnapshot,
+        int charStart,
+        int charEnd,
+        string originalBlockText)
+    {
+        if (string.Equals(source, sourceSnapshot, StringComparison.Ordinal))
+        {
+            return true;
+        }
+
+        if (!ReferenceEquals(currentDocument, documentSnapshot)
+            || charStart < 0
+            || charEnd < charStart
+            || charEnd > source.Length)
+        {
+            return false;
+        }
+
+        return source.AsSpan(charStart, charEnd - charStart).SequenceEqual(originalBlockText.AsSpan());
     }
 
     private static bool IsVisualDescendantOf(Visual child, Visual parent)

@@ -197,6 +197,6 @@ public sealed partial class MarkdownDocumentView : UserControl
 
     public void CancelQuickEditor() => _quickInlineEditingController.CancelQuickEditor();
 
-    internal void RaiseDocumentContentEdited(string newContent)
-        => DocumentContentEdited?.Invoke(this, new MarkdownDocumentContentEditedEventArgs(newContent));
+    internal void RaiseDocumentContentEdited(string newContent, string baseContent)
+        => DocumentContentEdited?.Invoke(this, new MarkdownDocumentContentEditedEventArgs(newContent, baseContent));
 }

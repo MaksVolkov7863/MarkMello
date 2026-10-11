@@ -247,7 +247,13 @@ public partial class ShellViewModel : ObservableObject
         ? string.Empty
         : FileName + (IsDirty ? " •" : string.Empty);
 
+    /// <summary>
+    /// Хук представления: дописывает в документ текст, набранный в открытом инлайн-редакторе.
+    /// Вызывается перед любой командой, которая сохраняет, переключает или подменяет документ.
+    /// </summary>
     public Action? CommitActiveInlineEditor { get; set; }
+
+    private void CommitPendingInlineEdit() => CommitActiveInlineEditor?.Invoke();
 
     public bool HasDocumentTitle => State == ViewState.Viewing && !string.IsNullOrWhiteSpace(FileName);
 
@@ -263,16 +269,16 @@ public partial class ShellViewModel : ObservableObject
 
     public bool IsSettingsOpen => ShellOverlay == ShellOverlayKind.ReadingSettings;
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "Bound to XAML view.")]
-    public bool ShowsAppMenuControl => State != ViewState.LoadError || Document is not null || EditorSession is not null;
+    public bool ShowsAppMenuControl => !IsEditMode;
 
-    public bool IsAppMenuOpen => ShellOverlay == ShellOverlayKind.AppMenu;
+    public bool IsAppMenuOpen => ShowsAppMenuControl && ShellOverlay == ShellOverlayKind.AppMenu;
 
     public bool IsAppSettingsOpen => ShellOverlay == ShellOverlayKind.AppSettings;
 
-    public bool IsAppAboutOpen => ShellOverlay == ShellOverlayKind.AppAbout;
+    public bool IsAppAboutOpen => ShowsAppMenuControl && ShellOverlay == ShellOverlayKind.AppAbout;
 
-    public bool IsAppOverlayOpen => IsAppSettingsOpen || ShellOverlay is ShellOverlayKind.AppMenu or ShellOverlayKind.AppAbout;
+    public bool IsAppOverlayOpen => IsAppSettingsOpen || (ShowsAppMenuControl
+        && ShellOverlay is ShellOverlayKind.AppMenu or ShellOverlayKind.AppAbout);
 
     public bool ShowsSaveButton => CanSave();
 
@@ -548,7 +554,7 @@ public partial class ShellViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanToggleEditMode))]
     private async Task ToggleEditModeAsync()
     {
-        CommitActiveInlineEditor?.Invoke();
+        CommitPendingInlineEdit();
 
         if (IsEditMode)
         {
@@ -568,7 +574,7 @@ public partial class ShellViewModel : ObservableObject
     private async Task SaveAsync()
     {
         CloseOverlayCore();
-        CommitActiveInlineEditor?.Invoke();
+        CommitPendingInlineEdit();
         var outcome = await SaveEditorAsync(promptForPathWhenMissing: true, forceSaveAs: false).ConfigureAwait(true);
         if (outcome.Cancelled)
         {
@@ -590,7 +596,7 @@ public partial class ShellViewModel : ObservableObject
     private async Task SaveAsAsync()
     {
         CloseOverlayCore();
-        CommitActiveInlineEditor?.Invoke();
+        CommitPendingInlineEdit();
         var outcome = await SaveEditorAsync(promptForPathWhenMissing: true, forceSaveAs: true).ConfigureAwait(true);
         if (outcome.Cancelled)
         {
@@ -822,6 +828,8 @@ public partial class ShellViewModel : ObservableObject
         {
             return true;
         }
+
+        CommitPendingInlineEdit();
 
         // Грязной может быть любая вкладка, а не только активная: показываем её пользователю
         // и спрашиваем про неё, после разрешения запрос на закрытие повторяется — так окно
@@ -1080,6 +1088,8 @@ public partial class ShellViewModel : ObservableObject
 
     private async Task LoadDocumentAsync(string path, bool preserveEditModeAfterLoad)
     {
+        // Ввод относится к текущему документу: фиксируем его до того, как документ сменится.
+        CommitPendingInlineEdit();
         var result = await _openDocument.ExecuteAsync(path).ConfigureAwait(true);
         ApplyOpenResult(result, preserveEditModeAfterLoad);
     }
@@ -1204,11 +1214,20 @@ public partial class ShellViewModel : ObservableObject
         UpdateCommandStates();
     }
 
-    public void ApplyQuickDocumentEdit(string newContent)
+    public bool ApplyQuickDocumentEdit(string newContent, string? expectedBaseContent = null)
     {
+        ArgumentNullException.ThrowIfNull(newContent);
+
         if (Document is null)
         {
-            return;
+            return false;
+        }
+
+        // Правка посчитана по конкретному исходнику. Если активный документ к этому моменту
+        // уже другой, накладывать её нельзя — иначе текст одного файла окажется в другом.
+        if (expectedBaseContent is not null && !string.Equals(SourceText, expectedBaseContent, StringComparison.Ordinal))
+        {
+            return false;
         }
 
         if (EditorSession is null)
@@ -1241,6 +1260,7 @@ public partial class ShellViewModel : ObservableObject
         OnPropertyChanged(nameof(SourceText));
         OnPropertyChanged(nameof(IsDirty));
         OnPropertyChanged(nameof(TitleFileDisplayName));
+        return true;
     }
 
     private void FailOpenResult(OpenDocumentResult result)
@@ -1259,6 +1279,9 @@ public partial class ShellViewModel : ObservableObject
         {
             return;
         }
+
+        // Незакоммиченный инлайн-ввод должен попасть в проверку «есть несохранённые правки».
+        CommitPendingInlineEdit();
 
         if (!RequiresDirtyResolution)
         {

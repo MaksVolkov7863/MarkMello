@@ -127,7 +127,7 @@ public partial class ViewerView : UserControl, IFindHost
 
     private void OnDocumentContentEdited(object? sender, MarkdownDocumentContentEditedEventArgs e)
     {
-        _viewModel?.ApplyQuickDocumentEdit(e.NewContent);
+        _viewModel?.ApplyQuickDocumentEdit(e.NewContent, e.BaseContent);
     }
 
     private void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
