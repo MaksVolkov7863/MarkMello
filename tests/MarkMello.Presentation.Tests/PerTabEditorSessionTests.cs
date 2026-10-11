@@ -120,6 +120,19 @@ public sealed class PerTabEditorSessionTests
     }
 
     [Fact]
+    public async Task QuickEditComputedForAnotherSourceIsIgnored()
+    {
+        var harness = CreateHarness();
+        await harness.ViewModel.OpenPathAsync(@"C:\docs\first.md");
+
+        var applied = harness.ViewModel.ApplyQuickDocumentEdit("# second edited", expectedBaseContent: "# second");
+
+        Assert.False(applied);
+        Assert.Equal("# first", harness.ViewModel.Document!.Content);
+        Assert.False(harness.ViewModel.IsDirty);
+    }
+
+    [Fact]
     public async Task QuickEditInReadingModeIsPreservedWhenSwitchingToEditMode()
     {
         var harness = CreateHarness();
