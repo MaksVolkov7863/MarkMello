@@ -190,9 +190,11 @@ public sealed partial class MarkdownDocumentView
         };
         _pendingQuickEditTimer.Tick += (_, _) =>
         {
+            // CancelPendingQuickEditTimer() обнуляет _pendingQuickEditAction, поэтому
+            // действие нужно забрать до остановки таймера, иначе редактор не откроется никогда.
+            var action = _pendingQuickEditAction;
             CancelPendingQuickEditTimer();
-            _pendingQuickEditAction?.Invoke();
-            _pendingQuickEditAction = null;
+            action?.Invoke();
         };
         _pendingQuickEditTimer.Start();
     }
